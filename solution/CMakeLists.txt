@@ -13,10 +13,13 @@ set(INCLUDE inc)
 
 set(SRCS
 	src/main.cpp
-	)
+	src/DLLoader/DynamicLibrary.cpp)
 
 set(HDRS
-	inc/zia.hpp)
+	inc/zia.hpp inc/DLLoader/DynamicLibrary.hpp)
+
+set(LIBS
+	"-ldl")
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
@@ -26,4 +29,4 @@ message(STATUS ${SRCS_SERVER})
 
 add_executable(${BINARY_NAME} ${SRCS} ${HDRS})
 target_include_directories(${BINARY_NAME} PRIVATE ${INCLUDE})
-target_link_libraries(${BINARY_NAME} ${CONAN_LIBS})
+target_link_libraries(${BINARY_NAME} ${CONAN_LIBS} ${LIBS})
