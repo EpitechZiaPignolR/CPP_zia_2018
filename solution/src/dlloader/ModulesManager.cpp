@@ -24,10 +24,10 @@ namespace zia::dlloader {
 	{
 #ifdef _WIN32
 		windows_compatibility::DynamicLibrary
-			loaded_library(std::forward(filePath));
+			loaded_library(std::forward<const std::string &&>(filePath));
 #else
 		unix_compatibility::DynamicLibrary
-			loaded_library(std::forward(filePath));
+			loaded_library(std::forward<const std::string &&>(filePath));
 #endif // _WIN32
 		using RegisterFunction = std::function<void(dems::StageManager &)>;
 		auto registerFunc = reinterpret_cast<RegisterFunction *>
