@@ -13,13 +13,26 @@ set(INCLUDE inc)
 
 set(SRCS
 	src/main.cpp
-	src/DLLoader/DynamicLibrary.cpp)
+	src/dlloader/linux/DynamicLibrary.cpp
+	src/dlloader/windows/DynamicLibrary.cpp
+	#src/serveur/Server.cpp
+	src/dlloader/ModulesManager.cpp)
 
 set(HDRS
-	inc/zia.hpp inc/DLLoader/DynamicLibrary.hpp)
+	inc/zia.hpp
+	inc/api/AModulesManager.hpp
+	inc/api/Heading.hpp
+	inc/api/Stage.hpp
+	inc/dlloader/linux/DynamicLibrary.hpp
+	inc/dlloader/windows/DynamicLibrary.hpp
+	inc/dlloader/IDynamicLibrary.hpp
+	inc/dlloader/ModulesManager.hpp
+	#inc/server/Server.hpp
+	#inc/server/IServer.hpp
+	)
 
 set(LIBS
-	"-ldl")
+	"-ldl -lstdc++fs")
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
