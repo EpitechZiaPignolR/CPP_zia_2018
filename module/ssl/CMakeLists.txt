@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.1.0)
 
 project(module_ssl DESCRIPTION "module ssl pour le zia")
 set(LIBRARY_NAME module_ssl)
+set(CMAKE_CXX_STANDARD 17)
 
 set(SRCS
 	src/ssl.cpp

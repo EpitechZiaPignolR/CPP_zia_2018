@@ -23,9 +23,9 @@ set(HDRS
 	inc/api/AModulesManager.hpp
 	inc/api/Heading.hpp
 	inc/api/Stage.hpp
+	inc/dlloader/IDynamicLibrary.hpp
 	inc/dlloader/linux/DynamicLibrary.hpp
 	inc/dlloader/windows/DynamicLibrary.hpp
-	inc/dlloader/IDynamicLibrary.hpp
 	inc/dlloader/ModulesManager.hpp
 	#inc/server/Server.hpp
 	#inc/server/IServer.hpp

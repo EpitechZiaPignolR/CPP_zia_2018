@@ -5,14 +5,19 @@
 ** main.cpp
 */
 
-#include "zia.hpp"
 #include <iostream>
+#include "zia.hpp"
+#include "dlloader/ModulesManager.hpp"
 
 int main(int ac, char **av)
 {
 	try {
 		(void)ac;
 		(void)av;
+		// Test
+		zia::dlloader::ModulesManager modulesManager;
+
+		modulesManager.loadOneModule("module/tester/libmodule_tester.so");
 	} catch (const std::exception &e) {
 		std::cerr << e.what() << std::endl;
 		return EXIT_FAILURE;

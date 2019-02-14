@@ -9,6 +9,8 @@
 
 #include "api/AModulesManager.hpp"
 
+typedef std::string (*RegisterFunction)(dems::StageManager &);
+
 namespace zia::dlloader {
 
 	class ModulesManager: public dems::AModulesManager {
@@ -23,7 +25,9 @@ namespace zia::dlloader {
 		/* Constructor */
 		ModulesManager() = default;
 
-		void loadModules(const std::string &directoryPath);
-		void loadOneModule(const std::string &filePath);
+		void loadModules(const std::string &directoryPath) override;
+		void loadOneModule(const std::string &filePath) override;
+
+		void unloadModule(const std::string &moduleName) override;
 	};
 }

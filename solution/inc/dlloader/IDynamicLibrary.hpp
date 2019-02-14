@@ -12,7 +12,7 @@ namespace zia::dlloader {
 	class IDynamicLibrary {
 	public:
 		/* Méthodes de la classe */
-		virtual ~IDynamicLibrary() = 0;
+		virtual ~IDynamicLibrary() {};
 		virtual void *loadSymbol(const std::string &&symbolName) = 0;
 	};
 }

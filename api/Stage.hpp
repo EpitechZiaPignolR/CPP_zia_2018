@@ -5,10 +5,14 @@
 #pragma once
 
 #include <string>
-#include <list>
+#include <map>
+#include <vector>
 #include <functional>
 #include "Heading.hpp"
 
+/**
+ * @brief dems namespace
+ */
 namespace dems {
 
 /**
@@ -22,9 +26,10 @@ enum class CodeStatus {
 };
 
 /**
- * The context that is send to each hook callback when a stage is triggered
+ * The context that is sent to each hook callback when a stage is triggered
  */
 struct Context {
+	std::vector<uint8_t> rawData;
 	header::HTTPMessage request;
 	header::HTTPMessage response;
 	int socketFd;
@@ -32,92 +37,161 @@ struct Context {
 
 /**
  * @class Stage
- * Define function that will be called at a certain Moment.
- * The hook will be at the First, middle and end of this Moment.
- * Firts is Before the Moment
- * Middle is during the Moment
- * End is when the Moment ends
+ * Defines function that will be called at a certain Stage.
+ * The hook will be at the First, middle and end of this Stage.
+ * First is at Stage start
+ * Middle is during the Stage
+ * End is at Stage end
  */
 class Stage {
 public:
+	/**
+	 * @brief Defines a callback function
+	 */
 	using hookModuleCallback = std::function<CodeStatus(Context &)>;
-	using hookList = std::list<std::pair<std::string, hookModuleCallback>>;
+	/**
+	 * @brief Defines a hooked module function
+	 */
+	struct hook {
+		hook(std::string const &name, hookModuleCallback &&function) : moduleName(name), callback(std::move(function)) {}
+		std::string moduleName;
+		hookModuleCallback callback;
+	};
+	/**
+	 * @brief Defines a map of hooked functions
+	 */
+	using hookMap = std::multimap<uint, hook>;
 public:
 	/**
 	 * Hook to the start of the stage
+	 * @param index The index for the map order
 	 * @param moduleName The name of the module
 	 * @param callback The callback called when a stage Time is triggered
 	 */
-	void hookToFirst(const std::string &moduleName, hookModuleCallback &&callback) {
-		first_.emplace_back(moduleName, std::move(callback));
+	void hookToFirst(uint index, const std::string &moduleName, hookModuleCallback &&callback) {
+		first_.emplace(index, hook{moduleName, std::move(callback)});
 	}
 	/**
 	 * Hook to the middle of the stage
+	 * @param index The index for the map order
 	 * @param moduleName The name of the module
 	 * @param callback The callback called when a stage Time is triggered
 	 */
-	void hookToMiddle(const std::string &moduleName, hookModuleCallback &&callback) {
-		middle_.emplace_back(moduleName, std::move(callback));
+	void hookToMiddle(uint index, const std::string &moduleName, hookModuleCallback &&callback) {
+		middle_.emplace(index, hook{moduleName, std::move(callback)});
 	}
 	/**
 	 * Hook to the end of the stage
+	 * @param index The index for the map order
 	 * @param moduleName The name of the module
 	 * @param callback The callback called when a stage Time is triggered
 	 */
-	void hookToEnd(const std::string &moduleName, hookModuleCallback &&callback) {
-		last_.emplace_back(moduleName, std::move(callback));
+	void hookToEnd(uint index, const std::string &moduleName, hookModuleCallback &&callback) {
+		last_.emplace(index, hook{moduleName, std::move(callback)});
 	}
 
 	/**
-	 * Return the modules hooked to the debut of the stage
+	 * Unload a module in the first moment
+	 * @param moduleName The name of the module
+	 */
+	void unhookFirst(const std::string &moduleName) {
+		for (auto &[idx, hook] : first_) {
+			if (hook.moduleName == moduleName)
+				first_.erase(idx);
+		}
+	}
+
+	/**
+	 * Unload a module in the middle moment
+	 * @param moduleName the name of the module
+	 */
+	void unhookMiddle(const std::string &moduleName) {
+		for (auto &[idx, hook] : middle_) {
+			if (hook.moduleName == moduleName)
+				middle_.erase(idx);
+		}
+	}
+
+	/**
+	 * Unload a module in the Last moment
+	 * @param moduleName the name of the module
+	 */
+	void unhookLast(const std::string &moduleName) {
+		for (auto &[idx, hook] : last_) {
+			if (hook.moduleName == moduleName)
+				last_.erase(idx);
+		}
+	}
+
+	/**
+	 * Unhook a module in the 3 moments
+	 * @param moduleName the name of the module
+	 */
+	void unhookAll(const std::string &moduleName) {
+		unhookFirst(moduleName);
+		unhookMiddle(moduleName);
+		unhookLast(moduleName);
+	}
+
+	/**
+	 * Clear All the hooks
+	 */
+	void clearHooks() {
+		first_.clear();
+		middle_.clear();
+		last_.clear();
+	}
+
+	/**
+	 * Returns the modules hooked to the debut of the stage
 	 * @return std::list of the modules hooked to the first
 	 */
-	const hookList &firstsHooks() { return first_; }
+	hookMap &firstHooks() { return first_; }
 	/**
-	 * Return the modules hooked to the middle of the stage
-	 * @return std::list of the modules hooked to the middles
+	 * Returns the modules hooked to the middle of the stage
+	 * @return std::list of the modules hooked to the middle
 	 */
-	const hookList &middlesHooks() { return middle_; }
+	hookMap &middleHooks() { return middle_; }
 	/**
-	 * Return the modules hooked to the end of the stage
-	 * @return std::list of the modules hooked to the ends
+	 * Returns the modules hooked to the end of the stage
+	 * @return std::list of the modules hooked to the end
 	 */
-	const hookList &endsHooks() { return last_; }
+	hookMap &endHooks() { return last_; }
 
 private:
-	hookList first_;
-	hookList middle_;
-	hookList last_;
+	hookMap first_;
+	hookMap middle_;
+	hookMap last_;
 };
 
 /**
  * @class StageManager
- * Define the differents Stage and manage them
+ * Defines the different Stages and manages them
  */
 class StageManager {
 public:
 
 	/**
-	 * Get the whole Request Stage
+	 * Gets the whole Request Stage
 	 * @return Request Stage
 	 */
 	Stage &request() { return request_; }
 
 	/**
-	 * Get the whole Configs Stage
-	 * @return Connection Stage
+	 * Gets the whole Config Stage
+	 * @return Config Stage
 	 */
 	Stage &connection() { return connection_; }
 
 	/**
-	 * Get the chunk Stage
+	 * Gets the chunks Stage
 	 * @return Chunks Stage
 	 */
 	Stage &chunks() { return chunks_; }
 
 	/**
-	 * Get the disconnect Stage
-	 * @return Chunks Stage
+	 * Gets the disconnect Stage
+	 * @return Disconnect Stage
 	 */
 	Stage &disconnect() { return disconnection_; }
 

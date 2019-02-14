@@ -1,14 +1,16 @@
 cmake_minimum_required(VERSION 3.1.0)
 
-project(module_php DESCRIPTION "module PhP pour le zia")
-set(LIBRARY_NAME module_php)
+project(module_tester DESCRIPTION "module tester pour le zia")
+set(LIBRARY_NAME module_tester)
 set(CMAKE_CXX_STANDARD 17)
 
 set(SRCS
-	src/php.cpp
+	src/tester.cpp
 	)
 
-set(HDRS)
+set(HDRS
+	inc/tester.hpp
+	)
 
 add_library(${LIBRARY_NAME} SHARED ${SRCS} ${HDRS})
 
