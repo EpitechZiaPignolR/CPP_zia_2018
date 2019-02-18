@@ -6,8 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wshadow -Wold-style-cast -Wcast-align -Wunused \
-	-Woverloaded-virtual -Wpedantic -Wsign-conversion -Wlogical-op -Wuseless-cast -Weffc++")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wshadow -Wcast-align -Wunused \
+	-Woverloaded-virtual -Wpedantic -Wlogical-op")
 
 set(INCLUDE inc)
 
@@ -15,7 +15,7 @@ set(SRCS
 	src/main.cpp
 	src/dlloader/linux/DynamicLibrary.cpp
 	src/dlloader/windows/DynamicLibrary.cpp
-	#src/serveur/Server.cpp
+	src/serveur/Server.cpp
 	src/dlloader/ModulesManager.cpp)
 
 set(HDRS
@@ -27,8 +27,7 @@ set(HDRS
 	inc/dlloader/linux/DynamicLibrary.hpp
 	inc/dlloader/windows/DynamicLibrary.hpp
 	inc/dlloader/ModulesManager.hpp
-	#inc/server/Server.hpp
-	#inc/server/IServer.hpp
+	inc/server/Server.hpp
 	)
 
 set(LIBS

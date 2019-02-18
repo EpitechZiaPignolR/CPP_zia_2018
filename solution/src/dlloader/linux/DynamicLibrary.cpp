@@ -13,6 +13,7 @@
 
 namespace zia::dlloader::unix_compatibility {
 	DynamicLibrary::DynamicLibrary(const std::string &&library_name)
+	:_handle(nullptr)
 	{
 		_handle = dlopen(library_name.c_str(), RTLD_LAZY);
 		if (_handle == nullptr) {

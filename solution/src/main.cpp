@@ -8,6 +8,7 @@
 #include <iostream>
 #include "zia.hpp"
 #include "dlloader/ModulesManager.hpp"
+#include "server/Server.hpp"
 
 int main(int ac, char **av)
 {
@@ -18,6 +19,12 @@ int main(int ac, char **av)
 		zia::dlloader::ModulesManager modulesManager;
 
 		modulesManager.loadOneModule("module/tester/libmodule_tester.so");
+
+		zia::server::Server server("127.0.0.1", 8080);
+
+		server.run([](zia::server::SocketPtr) -> void {
+			std::cout << "lol" << std::endl;
+		});
 	} catch (const std::exception &e) {
 		std::cerr << e.what() << std::endl;
 		return EXIT_FAILURE;

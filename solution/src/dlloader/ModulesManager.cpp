@@ -22,16 +22,20 @@ namespace zia::dlloader {
 
 	void ModulesManager::loadOneModule(const std::string &filePath)
 	{
+		if (_modules.count(filePath))
+			return;
 #ifdef _WIN32
-		windows_compatibility::DynamicLibrary
-			loaded_library(std::forward<const std::string &&>(filePath));
+		_modules[filePath] = IDynamicLibraryPtr(new windows_compatibility::DynamicLibrary
+			(std::forward<const std::string &&>(filePath)));
 #else
-		unix_compatibility::DynamicLibrary
-			loaded_library(std::forward<const std::string &&>(filePath));
+		_modules[filePath] = IDynamicLibraryPtr(new unix_compatibility::DynamicLibrary
+			(std::forward<const std::string &&>(filePath)));
 #endif // _WIN32
-		using RegisterFunction = std::function<void(dems::StageManager &)>;
-		auto registerFunc = reinterpret_cast<RegisterFunction *>
-			(loaded_library.loadSymbol("registerHooks"));
-		(*registerFunc)(getStageManager());
+		auto registerFunc = reinterpret_cast<RegisterFunction>
+			(_modules[filePath]->loadSymbol("registerHooks"));
+		(*registerFunc)(std::move(getStageManager()));
 	}
+
+	void ModulesManager::unloadModule(const std::string &)
+	{}
 }

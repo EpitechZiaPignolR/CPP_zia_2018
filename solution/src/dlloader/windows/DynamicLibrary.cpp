@@ -30,6 +30,7 @@ namespace zia::dlloader::unix_compatibility {
 	}
 
 	DynamicLibrary::DynamicLibrary(const std::string &&library_name)
+	: _handle(nullptr)
 	{
 		_handle = LoadLibrary(library_name.c_str());
 		if (_handle == nullptr) {
