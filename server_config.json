@@ -1,0 +1,13 @@
+{
+	"server": {
+		"ip": "127.0.0.1",
+		"port": 8080
+	},
+	"modules": {
+		"Tester": {
+			"path": "module/tester/libmodule_tester.so"
+		}
+	},
+	"tableau nul": [{}, 2,3,4],
+	"": ""
+}

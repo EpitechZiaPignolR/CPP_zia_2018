@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include "api/AModulesManager.hpp"
 #include "dlloader/IDynamicLibrary.hpp"
+#include "server/ConfigManager.hpp"
 
 typedef std::string (*RegisterFunction)(dems::StageManager &&);
 
@@ -19,6 +20,9 @@ namespace zia::dlloader {
 		using IDynamicLibraryPtr = std::unique_ptr<IDynamicLibrary>;
 		std::unordered_map<std::string, IDynamicLibraryPtr> _modules;
 
+		void loadBasicModules();
+		void loadModulesFromConfig(const dems::config::ConfigObject &modulesConfig);
+		void loadOneModuleFromSettings(const dems::config::ConfigObject &moduleSettings);
 	public:
 		/* Suppression des constructeur par copie */
 		ModulesManager& operator=(const ModulesManager &) = delete;
@@ -28,7 +32,8 @@ namespace zia::dlloader {
 		~ModulesManager() override = default;
 
 		/* Constructor */
-		ModulesManager() = default;
+		ModulesManager(const dems::config::Config &);
+		ModulesManager();
 
 		void loadModules(const std::string &directoryPath) override;
 		void loadOneModule(const std::string &filePath) override;

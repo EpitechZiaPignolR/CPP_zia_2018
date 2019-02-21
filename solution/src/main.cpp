@@ -9,24 +9,36 @@
 #include "zia.hpp"
 #include "dlloader/ModulesManager.hpp"
 #include "server/Server.hpp"
+#include "server/Request.hpp"
+#include "server/ConfigManager.hpp"
 
 int main(int ac, char **av)
 {
+	if (ac != 2){
+		std::cerr << "Error: Invalid number of argument" << std::endl;
+		return EXIT_FAILURE;
+	}
 	try {
-		(void)ac;
-		(void)av;
-		// Test
-		zia::dlloader::ModulesManager modulesManager;
+		// get config
+		zia::server::ConfigManager configManager(av[1]);
+		auto config = std::move(configManager.getConfig());
 
-		modulesManager.loadOneModule("module/tester/libmodule_tester.so");
+		zia::dlloader::ModulesManager modulesManager(config);
+//		modulesManager.loadOneModule("module/tester/libmodule_tester.so");
 
 		zia::server::Server server("127.0.0.1", 8080);
 
-		server.run([](zia::server::SocketPtr) -> void {
-			std::cout << "lol" << std::endl;
-		});
+		auto handleRequest = zia::server::Callback(std::bind(
+			[](dems::StageManager &stageManager, zia::server::SocketPtr socket)-> void{
+				// lambda who handle a request
+				zia::server::Request request(stageManager, std::move(socket));
+				request.handleRequest();
+			}, modulesManager.getStageManager(), std::placeholders::_1));
+
+
+		server.run(handleRequest);
 	} catch (const std::exception &e) {
-		std::cerr << e.what() << std::endl;
+		std::cerr << "Error: " << e.what() << std::endl;
 		return EXIT_FAILURE;
 	}
 	std::cout << "Exit success 1" << std::endl;

@@ -25,7 +25,6 @@ namespace zia::server {
 
 		boost::asio::ip::tcp::endpoint _endpoint;
 		boost::asio::ip::tcp::acceptor _acceptor;
-		boost::asio::ip::tcp::socket _socket;
 
 		boost::asio::thread_pool _threadPool;
 

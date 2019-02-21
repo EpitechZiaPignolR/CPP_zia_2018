@@ -10,14 +10,13 @@
 #include "server/Server.hpp"
 
 namespace zia::server {
-	Server::Server(const std::string &&ip, unsigned short port)
-	: _io_service(),
+	Server::Server(const std::string &&ip, unsigned short port):
+		_io_service(),
 		_signals(_io_service),
 		_ip(boost::asio::ip::address_v4::from_string(ip)),
 		_port(port),
 		_endpoint(),
 		_acceptor(_io_service),
-		_socket(_io_service),
 		_threadPool(THREAD_NB)
 	{
 		_signals.add(SIGINT);

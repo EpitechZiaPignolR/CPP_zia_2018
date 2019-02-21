@@ -38,4 +38,63 @@ namespace zia::dlloader {
 
 	void ModulesManager::unloadModule(const std::string &)
 	{}
+
+	void ModulesManager::loadBasicModules()
+	{
+		std::cout << "Loading of Basic Modules..." << std::endl;
+		std::cout << "End of loading basic modules..." << std::endl;
+	}
+
+	void ModulesManager::loadOneModuleFromSettings(const dems::config::ConfigObject &moduleSettings)
+	{
+		if (moduleSettings.count("path")) {
+			try {
+				loadOneModule(std::get<std::string>(moduleSettings.at("path").v));
+			}
+			catch (const std::bad_variant_access&) {
+				std::cerr << "Error: can not loading this module: invalid path" << std::endl;
+			}
+		} else
+			std::cerr << "Error: can not loading this module: no path given" << std::endl;
+
+	}
+
+	void ModulesManager::loadModulesFromConfig(const dems::config::ConfigObject &modulesConfig)
+	{
+		std::cout << "Loading "<< modulesConfig.size() <<" module(s)..." << std::endl;
+		for (auto &it: modulesConfig) {
+			std::cout << "Loading " << it.first << "..." << std::endl;
+			try {
+				auto moduleSettings = std::get<dems::config::ConfigObject>(it.second.v);
+				loadOneModuleFromSettings(moduleSettings);
+			}
+			catch (const std::bad_variant_access&) {
+				std::cerr << "Error: can not loading this module: no settings given" << std::endl;
+			}
+			catch (const std::exception &e){
+				std::cerr << "Error: can not loading this module: " << e.what() << std::endl;
+			}
+		}
+		std::cout << "End of loading modules..." << std::endl;
+	}
+
+	ModulesManager::ModulesManager(const dems::config::Config &config)
+	: ModulesManager()
+	{
+		try {
+			if (!config.count("modules"))
+				return;
+
+			// get modules config
+			auto modulesConfig = std::get<dems::config::ConfigObject>
+			        (config.at("modules").v);
+			loadModulesFromConfig(modulesConfig);
+		}
+		catch (const std::bad_variant_access&) {}
+	}
+
+	ModulesManager::ModulesManager()
+	{
+		loadBasicModules();
+	}
 }
