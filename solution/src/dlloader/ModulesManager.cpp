@@ -65,7 +65,7 @@ namespace zia::dlloader {
 		for (auto &it: modulesConfig) {
 			std::cout << "Loading " << it.first << "..." << std::endl;
 			try {
-				auto moduleSettings = std::get<dems::config::ConfigObject>(it.second.v);
+				auto &moduleSettings = std::get<dems::config::ConfigObject>(it.second.v);
 				loadOneModuleFromSettings(moduleSettings);
 			}
 			catch (const std::bad_variant_access&) {

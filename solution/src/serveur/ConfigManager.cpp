@@ -20,7 +20,7 @@ namespace zia::server {
 			std::cerr << "Error: Invalid config file" << std::endl;
 			_config["modules"].v = dems::config::ConfigObject();
 			_config["server"].v = dems::config::ConfigObject();
-			auto serverConfig = std::get<dems::config::ConfigObject>(_config["server"].v);
+			auto &serverConfig = std::get<dems::config::ConfigObject>(_config["server"].v);
 			serverConfig["ip"].v = "127.0.0.1";
 			serverConfig["port"].v = 8080ll;
 			return;

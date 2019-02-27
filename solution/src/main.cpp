@@ -24,9 +24,7 @@ int main(int ac, char **av)
 		auto config = std::move(configManager.getConfig());
 
 		zia::dlloader::ModulesManager modulesManager(config);
-//		modulesManager.loadOneModule("module/tester/libmodule_tester.so");
-
-		zia::server::Server server("127.0.0.1", 8080);
+		zia::server::Server server(config);
 
 		auto handleRequest = zia::server::Callback(std::bind(
 			[](dems::StageManager &stageManager, zia::server::SocketPtr socket)-> void{
@@ -34,7 +32,6 @@ int main(int ac, char **av)
 				zia::server::Request request(stageManager, std::move(socket));
 				request.handleRequest();
 			}, modulesManager.getStageManager(), std::placeholders::_1));
-
 
 		server.run(handleRequest);
 	} catch (const std::exception &e) {

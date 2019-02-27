@@ -10,14 +10,15 @@
 #include "server/Server.hpp"
 
 namespace zia::server {
-	Server::Server(const std::string &&ip, unsigned short port):
+	Server::Server(dems::config::Config &config):
 		_io_service(),
 		_signals(_io_service),
-		_ip(boost::asio::ip::address_v4::from_string(ip)),
-		_port(port),
+		_ip(),
+		_port(),
 		_endpoint(),
 		_acceptor(_io_service),
-		_threadPool(THREAD_NB)
+		_threadPool(THREAD_NB),
+		_isRunning(false)
 	{
 		_signals.add(SIGINT);
 		_signals.add(SIGTERM);
@@ -27,8 +28,53 @@ namespace zia::server {
 		_signals.async_wait(
 			[this](boost::system::error_code, int) {
 				stop();
-				std::cout << "stop" << std::endl;
 			});
+
+		reloadConfig(config);
+	}
+
+	void Server::loadDefaultConfig(dems::config::Config &config)
+	{
+		_ip = boost::asio::ip::address_v4();
+		_port = 8080;
+
+		config["server"].v = dems::config::ConfigObject();
+		auto &configServer = std::get<dems::config::ConfigObject>(config["server"].v);
+		configServer["ip"].v = _ip.to_string();
+		configServer["port"].v = static_cast<long long>(_port);
+	}
+
+	void Server::reloadConfig(dems::config::Config &config)
+	{
+		std::cout << "Setting up server..." << std::endl;
+		if (!config.count("server"))
+			loadDefaultConfig(config);
+		else
+			try {
+				auto &configServer = std::get<dems::config::ConfigObject>(config["server"].v);
+				if (!config.count("ip")) {
+					_ip = boost::asio::ip::address_v4();
+					configServer["ip"].v = _ip.to_string();
+				} else
+					try {
+						auto &ip = std::get<std::string>(configServer["ip"].v);
+						_ip = boost::asio::ip::address_v4::from_string(ip);
+					} catch (const std::exception &) {
+						_ip = boost::asio::ip::address_v4::from_string("");
+					}
+				if (!config.count("port")) {
+					_port = 8080;
+					configServer["port"].v = static_cast<long long>(_port);
+				} else
+					try {
+						_port = std::get<long long>(configServer["port"].v);
+					} catch (const std::exception &) {
+						_port = 8080;
+					}
+			} catch (const std::exception &) {
+				loadDefaultConfig(config);
+			}
+		std::cout << "Server address: " << _ip << ":" << _port << std::endl;
 
 		boost::asio::ip::tcp::resolver resolver(_io_service);
 		_endpoint = *resolver.resolve({_ip, _port});
@@ -36,7 +82,9 @@ namespace zia::server {
 		_acceptor.open(_endpoint.protocol());
 		_acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
 		_acceptor.bind(_endpoint);
+		std::cout << "Server is set up" << std::endl;
 	}
+
 
 	void Server::waitForConnection(const Callback &cb)
 	{
@@ -56,14 +104,32 @@ namespace zia::server {
 
 	void Server::run(const Callback &cb)
 	{
+		std::cout << "Running server..." << std::endl;
 		_acceptor.listen();
 		waitForConnection(cb);
+		_isRunning = true;
+		std::cout << "Server is running" << std::endl;
 		_io_service.run();
 	}
 
 	void Server::stop()
 	{
+		std::cout << "Closing server..." << std::endl;
 		_acceptor.close();
 		_io_service.stop();
+		_isRunning = false;
+		std::cout << "Server is closed" << std::endl;
+	}
+
+	void Server::reload(dems::config::Config &config, const Callback &cb)
+	{
+		std::cout << "Reloading server..." << std::endl;
+		auto oldState = _isRunning;
+		if (oldState)
+			stop();
+		reloadConfig(config);
+		if (oldState)
+			run(cb);
+		std::cout << "Server is reloaded" << std::endl;
 	}
 }
