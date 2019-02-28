@@ -8,6 +8,7 @@
 #pragma once
 
 #include <boost/asio.hpp>
+#include <boost/thread.hpp>
 #include "api/Config.hpp"
 
 namespace zia::server {
@@ -19,6 +20,7 @@ namespace zia::server {
 
 		/* paramètres boost pour le serveur Tcp */
 		boost::asio::io_service _io_service;
+		boost::thread _io_thread;
 		boost::asio::signal_set _signals;
 
 		boost::asio::ip::address_v4 _ip;
@@ -43,11 +45,11 @@ namespace zia::server {
 
 		/* ctor et dtor */
 		explicit Server(dems::config::Config &);
-		~Server() = default;
+		~Server();
 
 		void run(const Callback &cb);
 		void stop();
 
-		void reload(dems::config::Config &config, const Callback &cb);
+		bool isRunning() const;
 	};
 }

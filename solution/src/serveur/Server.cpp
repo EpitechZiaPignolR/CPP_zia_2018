@@ -18,7 +18,7 @@ namespace zia::server {
 		_endpoint(),
 		_acceptor(_io_service),
 		_threadPool(THREAD_NB),
-		_isRunning(false)
+		_isRunning(false),
 	{
 		_signals.add(SIGINT);
 		_signals.add(SIGTERM);
@@ -27,10 +27,18 @@ namespace zia::server {
 #endif // defined(SIGQUIT)
 		_signals.async_wait(
 			[this](boost::system::error_code, int) {
-				stop();
+				if (_isRunning)
+					stop();
 			});
 
 		reloadConfig(config);
+	}
+
+	Server::~Server()
+	{
+		std::cerr << "destroy server" << std::endl;
+		if (_isRunning)
+			stop();
 	}
 
 	void Server::loadDefaultConfig(dems::config::Config &config)
@@ -52,7 +60,7 @@ namespace zia::server {
 		else
 			try {
 				auto &configServer = std::get<dems::config::ConfigObject>(config["server"].v);
-				if (!config.count("ip")) {
+				if (!configServer.count("ip")) {
 					_ip = boost::asio::ip::address_v4();
 					configServer["ip"].v = _ip.to_string();
 				} else
@@ -62,7 +70,7 @@ namespace zia::server {
 					} catch (const std::exception &) {
 						_ip = boost::asio::ip::address_v4::from_string("");
 					}
-				if (!config.count("port")) {
+				if (!configServer.count("port")) {
 					_port = 8080;
 					configServer["port"].v = static_cast<long long>(_port);
 				} else
@@ -74,11 +82,12 @@ namespace zia::server {
 			} catch (const std::exception &) {
 				loadDefaultConfig(config);
 			}
-		std::cout << "Server address: " << _ip << ":" << _port << std::endl;
 
 		boost::asio::ip::tcp::resolver resolver(_io_service);
 		_endpoint = *resolver.resolve({_ip, _port});
+		std::cout << "Server address: " << _ip << ":" << _port << std::endl;
 
+		_acceptor.close();
 		_acceptor.open(_endpoint.protocol());
 		_acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
 		_acceptor.bind(_endpoint);
@@ -91,12 +100,8 @@ namespace zia::server {
 		auto socket = SocketPtr(new boost::asio::ip::tcp::socket(_io_service));
 		_acceptor.async_accept(*socket,
 			boost::bind<void>([this, socket](const Callback &callback, const boost::system::error_code &err) {
-				if (!_acceptor.is_open())
+				if (!_acceptor.is_open() || err)
 					return;
-				if (err) {
-					std::cout << "Error: when waiting for connection" << std::endl;
-					throw;
-				}
 				boost::asio::post(_threadPool, boost::bind(callback, socket));
 				waitForConnection(callback);
 				}, cb, boost::asio::placeholders::error));
@@ -105,31 +110,27 @@ namespace zia::server {
 	void Server::run(const Callback &cb)
 	{
 		std::cout << "Running server..." << std::endl;
-		_acceptor.listen();
-		waitForConnection(cb);
 		_isRunning = true;
+		_acceptor.listen();
+
+		waitForConnection(cb);
+		_io_thread = boost::thread(boost::bind(&boost::asio::io_service::run, &_io_service));
 		std::cout << "Server is running" << std::endl;
-		_io_service.run();
 	}
 
 	void Server::stop()
 	{
 		std::cout << "Closing server..." << std::endl;
+		_isRunning = false;
 		_acceptor.close();
 		_io_service.stop();
-		_isRunning = false;
+		if (_io_thread.joinable())
+			_io_thread.join();
 		std::cout << "Server is closed" << std::endl;
 	}
 
-	void Server::reload(dems::config::Config &config, const Callback &cb)
+	bool Server::isRunning() const
 	{
-		std::cout << "Reloading server..." << std::endl;
-		auto oldState = _isRunning;
-		if (oldState)
-			stop();
-		reloadConfig(config);
-		if (oldState)
-			run(cb);
-		std::cout << "Server is reloaded" << std::endl;
+		return _isRunning;
 	}
 }

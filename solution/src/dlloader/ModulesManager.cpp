@@ -75,22 +75,44 @@ namespace zia::dlloader {
 				std::cerr << "Error: can not loading this module: " << e.what() << std::endl;
 			}
 		}
-		std::cout << "End of loading modules..." << std::endl;
+		std::cout << "Modules is loaded." << std::endl;
+	}
+
+	void ModulesManager::loadConfig(const dems::config::Config &config)
+	{
+		if (!config.count("modules")) {
+			loadBasicModules();
+		} else {
+			try {
+				// get modules config
+				auto modulesConfig = std::get<dems::config::ConfigObject>
+					(config.at("modules").v);
+				loadModulesFromConfig(modulesConfig);
+			}
+			catch (const std::bad_variant_access&) {
+			}
+		}
+	}
+
+	void ModulesManager::reloadConfig(const dems::config::Config &config)
+	{
+		std::cout << "Reloading modules..." << std::endl;
+		/* clear all Modules*/
+		getStageManager().connection().clearHooks();
+		getStageManager().request().clearHooks();
+		getStageManager().chunks().clearHooks();
+		getStageManager().disconnect().clearHooks();
+		_modules.clear();
+
+		/* load new config */
+		loadConfig(config);
+		std::cout << "Modules is reloaded." << std::endl;
 	}
 
 	ModulesManager::ModulesManager(const dems::config::Config &config)
 	: ModulesManager()
 	{
-		try {
-			if (!config.count("modules"))
-				return;
-
-			// get modules config
-			auto modulesConfig = std::get<dems::config::ConfigObject>
-			        (config.at("modules").v);
-			loadModulesFromConfig(modulesConfig);
-		}
-		catch (const std::bad_variant_access&) {}
+		loadConfig(config);
 	}
 
 	ModulesManager::ModulesManager()

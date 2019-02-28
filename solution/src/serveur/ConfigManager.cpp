@@ -6,13 +6,43 @@
 */
 
 #include <cstring>
+#include <fstream>
 #include "server/ConfigManager.hpp"
 
 namespace zia::server {
-	ConfigManager::ConfigManager(const std::string &&configFile):
+	ConfigManager::ConfigManager(const std::string &configFile):
+		_config()
+	{
+		reloadConfig(configFile);
+	}
+
+	ConfigManager::ConfigManager():
 	_config()
 	{
+		_config["modules"].v = dems::config::ConfigObject();
+		_config["server"].v = dems::config::ConfigObject();
+		auto &serverConfig = std::get<dems::config::ConfigObject>(_config["server"].v);
+		serverConfig["ip"].v = "127.0.0.1";
+		serverConfig["port"].v = 8080ll;
+
+		// create default config file
+		std::ofstream defaultConfigFile("default_server_config.json");
+		defaultConfigFile << "{" << std::endl;
+		defaultConfigFile << "\t\"server\": {" << std::endl;
+		defaultConfigFile << "\t\t\"ip\": \"127.0.0.1\"," << std::endl;
+		defaultConfigFile << "\t\t\"port\": \"8080\"" << std::endl;
+		defaultConfigFile << "\t}," << std::endl;
+		defaultConfigFile << "\t\"modules\": {" << std::endl;
+		defaultConfigFile << "\t\t}" << std::endl;
+		defaultConfigFile << "\t}" << std::endl;
+		defaultConfigFile << "}" << std::endl;
+	}
+
+	void ConfigManager::reloadConfig(const std::string &configFile)
+	{
+		_config = dems::config::Config();
 		boost::property_tree::ptree root;
+
 		try {
 			boost::property_tree::read_json(configFile, root);
 		}

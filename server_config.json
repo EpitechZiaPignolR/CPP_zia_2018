@@ -7,7 +7,5 @@
 		"Tester": {
 			"path": "module/tester/libmodule_tester.so"
 		}
-	},
-	"tableau nul": [{}, 2,3,4],
-	"": ""
+	}
 }

@@ -23,6 +23,8 @@ namespace zia::dlloader {
 		void loadBasicModules();
 		void loadModulesFromConfig(const dems::config::ConfigObject &modulesConfig);
 		void loadOneModuleFromSettings(const dems::config::ConfigObject &moduleSettings);
+
+		void loadConfig(const dems::config::Config &config);
 	public:
 		/* Suppression des constructeur par copie */
 		ModulesManager& operator=(const ModulesManager &) = delete;
@@ -39,5 +41,7 @@ namespace zia::dlloader {
 		void loadOneModule(const std::string &filePath) override;
 
 		void unloadModule(const std::string &moduleName) override;
+
+		void reloadConfig(const dems::config::Config &config);
 	};
 }

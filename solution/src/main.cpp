@@ -6,11 +6,12 @@
 */
 
 #include <iostream>
-#include "zia.hpp"
-#include "dlloader/ModulesManager.hpp"
+/*#include "dlloader/ModulesManager.hpp"
 #include "server/Server.hpp"
 #include "server/Request.hpp"
 #include "server/ConfigManager.hpp"
+*/
+#include "server/ShellServer.hpp"
 
 int main(int ac, char **av)
 {
@@ -20,7 +21,7 @@ int main(int ac, char **av)
 	}
 	try {
 		// get config
-		zia::server::ConfigManager configManager(av[1]);
+/*		zia::server::ConfigManager configManager(av[1]);
 		auto config = std::move(configManager.getConfig());
 
 		zia::dlloader::ModulesManager modulesManager(config);
@@ -33,11 +34,13 @@ int main(int ac, char **av)
 				request.handleRequest();
 			}, modulesManager.getStageManager(), std::placeholders::_1));
 
-		server.run(handleRequest);
+		server.run(handleRequest);*/
+		zia::server::ShellServer shell(av[1]);
+		shell.run();
 	} catch (const std::exception &e) {
 		std::cerr << "Error: " << e.what() << std::endl;
 		return EXIT_FAILURE;
 	}
-	std::cout << "Exit success 1" << std::endl;
+	std::cout << "Bye." << std::endl;
 	return EXIT_SUCCESS;
 }

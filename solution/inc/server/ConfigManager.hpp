@@ -24,11 +24,11 @@ namespace zia::server {
 		void provideConfigArray(const boost::property_tree::ptree &node,
 			dems::config::ConfigArray &config);
 
-
 	public:
-		ConfigManager(const std::string &&configFile);
-		ConfigManager() = default;
+		ConfigManager(const std::string &configFile);
+		ConfigManager();
 
 		dems::config::Config &&getConfig();
+		void reloadConfig(const std::string &configFile);
 	};
 }

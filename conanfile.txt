@@ -1,5 +1,6 @@
 [requires]
 boost/1.69.0@conan/stable
+boost_algorithm/1.69.0@bincrafters/stable
 boost_asio/1.69.0@bincrafters/stable
 boost_property_tree/1.69.0@bincrafters/stable
 
