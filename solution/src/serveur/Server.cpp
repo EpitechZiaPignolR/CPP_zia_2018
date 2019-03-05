@@ -18,7 +18,7 @@ namespace zia::server {
 		_endpoint(),
 		_acceptor(_io_service),
 		_threadPool(THREAD_NB),
-		_isRunning(false),
+		_isRunning(false)
 	{
 		_signals.add(SIGINT);
 		_signals.add(SIGTERM);

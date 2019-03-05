@@ -63,8 +63,13 @@ namespace zia::server {
 			auto handleRequest = zia::server::Callback(std::bind(
 				[](dems::StageManager &stageManager, zia::server::SocketPtr socket)-> void{
 					// lambda who handle a request
-					Request request(stageManager, std::move(socket));
-					request.handleRequest();
+					try {
+						Request request(stageManager, std::move(socket));
+						request.handleRequest();
+					}
+					catch (const std::exception &e){
+						std::cerr << "Error in Request socket: " << e.what() << std::endl;
+					}
 				}, _modulesManager.getStageManager(), std::placeholders::_1));
 
 			_server->run(handleRequest);
