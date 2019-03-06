@@ -14,14 +14,11 @@
 dems::CodeStatus CodeStatu(dems::Context &code)
 {
     std::string tmp;
-    dems::header::IHeaders::getWholeHeaders &head;
     auto &res = std::get<dems::header::Response>(code.response);
 
     std::string status_line = res.httpVersion + ' ' + res.message + ' ' + res.statusCode + "\r\n";
-    status_line = 
-    std::cout << status_line << std::endl;
-}
+    status_line += code.response.headers->getWholeHeaders() + code.response.body;
 
-int main(void)
-{
+    for (auto &it : status_line)
+        code.rawData.push_back(it);
 }
