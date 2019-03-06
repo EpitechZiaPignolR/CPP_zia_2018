@@ -14,6 +14,7 @@ namespace zia::server {
 	class Request {
 		zia::server::SocketPtr _socket;
 		dems::StageManager &_stageManager;
+		dems::Context _context;
 
 	public:
 		/* Suppression des constructeur par copie */

@@ -18,7 +18,7 @@ namespace zia::server {
 	class Server {
 		static constexpr std::size_t THREAD_NB = 256;
 
-		/* paramètres boost pour le serveur Tcp */
+		/* paramètres boost pour le server Tcp */
 		boost::asio::io_service _io_service;
 		boost::thread _io_thread;
 		boost::asio::signal_set _signals;

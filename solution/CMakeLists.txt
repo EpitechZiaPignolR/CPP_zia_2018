@@ -15,8 +15,14 @@ set(SRCS
 	src/main.cpp
 	src/dlloader/linux/DynamicLibrary.cpp
 	src/dlloader/windows/DynamicLibrary.cpp
-	src/serveur/Server.cpp
-	src/dlloader/ModulesManager.cpp src/serveur/Request.cpp src/serveur/ConfigManager.cpp src/serveur/ShellServer.cpp)
+	src/server/Server.cpp
+	src/dlloader/ModulesManager.cpp
+	src/server/Request.cpp
+	src/server/ConfigManager.cpp
+	src/server/ShellServer.cpp
+	src/default_module/DefaultReader.cpp
+	src/default_module/ModuleContextConverter.cpp
+	)
 
 set(HDRS
 	inc/zia.hpp
@@ -28,7 +34,11 @@ set(HDRS
 	inc/dlloader/windows/DynamicLibrary.hpp
 	inc/dlloader/ModulesManager.hpp
 	inc/server/Server.hpp
-	inc/server/Request.hpp inc/server/ConfigManager.hpp inc/server/ShellServer.hpp)
+	inc/server/Request.hpp
+	inc/server/ConfigManager.hpp
+	inc/server/ShellServer.hpp
+	inc/default_module/DefaultReader.hpp
+	inc/default_module/ModuleContextConverter.hpp)
 
 set(LIBS
 	"-ldl -lstdc++fs")
