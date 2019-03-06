@@ -4,7 +4,7 @@
 ** File description:
 ** code status
 */
-
+#include <iostream>
 #include "default_module/ModuleContextConverter.hpp"
 
 namespace zia::default_module {
@@ -14,14 +14,19 @@ namespace zia::default_module {
 		auto &response = context.response;
 		try {
 			auto &firstLine = std::get<dems::header::Response>(response.firstLine);
-			tmp = firstLine.httpVersion + ' ' + firstLine.message + ' ' + firstLine.statusCode + "\r\n";
+			tmp = firstLine.httpVersion + ' ' + firstLine.statusCode
+				+ ' ' + firstLine.message + "\r\n";
 		} catch (std::exception &) {
 			return dems::CodeStatus::HTTP_ERROR;
 		}
-		tmp += response.headers->getWholeHeaders() + "\r\n" + response.body;
-
+		if (response.headers != nullptr) {
+			tmp += response.headers->getWholeHeaders();
+		}
+		tmp += "\r\n" + response.body;
+		context.rawData.clear();
 		for (auto &it : tmp)
 			context.rawData.push_back(it);
+		std::cout << tmp << std::endl;
 		return dems::CodeStatus::OK;
         }
 }

@@ -11,7 +11,9 @@
 #include "dlloader/linux/DynamicLibrary.hpp"
 #include "dlloader/windows/DynamicLibrary.hpp"
 #include "default_module/ModuleContextConverter.hpp"
-#include "default_module/DefaultReader.hpp"
+#include "default_module/ModuleReader.hpp"
+#include "default_module/ModuleWriter.hpp"
+#include "default_module/ModuleDefaultPage.hpp"
 
 namespace zia::dlloader {
 	void ModulesManager::loadModules(const std::string &directoryPath)
@@ -44,8 +46,10 @@ namespace zia::dlloader {
 	void ModulesManager::loadBasicModules()
 	{
 		std::cout << "Loading of Basic Modules..." << std::endl;
-		zia::default_module::registerDefaultReaderHooks(getStageManager());
+		zia::default_module::registerReaderHooks(getStageManager());
+		zia::default_module::registerWriterHooks(getStageManager());
 		zia::default_module::registerContextConverterHooks(getStageManager());
+		zia::default_module::registerDefaultPageHooks(getStageManager());
 
 		std::cout << "End of loading basic modules..." << std::endl;
 	}
