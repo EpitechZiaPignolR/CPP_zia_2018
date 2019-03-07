@@ -22,7 +22,10 @@ set(SRCS
 	src/server/ShellServer.cpp
 	src/default_module/ModuleReader.cpp
 	src/default_module/ModuleContextConverter.cpp
-	src/default_module/ModuleWriter.cpp src/default_module/ModuleDefaultPage.cpp)
+	src/default_module/ModuleWriter.cpp
+	src/default_module/ModuleDefaultPage.cpp
+	src/default_module/ModuleHttpService.cpp
+	)
 
 set(HDRS
 	inc/zia.hpp
@@ -38,7 +41,10 @@ set(HDRS
 	inc/server/ConfigManager.hpp
 	inc/server/ShellServer.hpp
 	inc/default_module/ModuleReader.hpp
-	inc/default_module/ModuleContextConverter.hpp inc/default_module/ModuleWriter.hpp inc/default_module/ModuleDefaultPage.hpp)
+	inc/default_module/ModuleContextConverter.hpp
+	inc/default_module/ModuleWriter.hpp
+	inc/default_module/ModuleDefaultPage.hpp
+	inc/default_module/ModuleHttpService.hpp)
 
 set(LIBS
 	"-ldl -lstdc++fs")

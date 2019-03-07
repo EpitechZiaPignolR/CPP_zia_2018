@@ -61,16 +61,16 @@ namespace zia::server {
 		} else {
 			_server = std::make_unique<Server>(_config);
 			auto handleRequest = zia::server::Callback(std::bind(
-				[](dems::StageManager &stageManager, zia::server::SocketPtr socket)-> void{
+				[](dems::config::Config &config, dems::StageManager &stageManager, zia::server::SocketPtr socket)-> void{
 					// lambda who handle a request
 					try {
-						Request request(stageManager, std::move(socket));
+						Request request(config, stageManager, std::move(socket));
 						request.handleRequest();
 					}
 					catch (const std::exception &e){
 						std::cerr << "Error in Request socket: " << e.what() << std::endl;
 					}
-				}, _modulesManager.getStageManager(), std::placeholders::_1));
+				}, _config, _modulesManager.getStageManager(), std::placeholders::_1));
 
 			_server->run(handleRequest);
 		}

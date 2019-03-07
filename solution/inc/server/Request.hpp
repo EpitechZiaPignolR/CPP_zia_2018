@@ -22,7 +22,7 @@ namespace zia::server {
 		Request(const Request &) = delete;
 
 		/* ctor and dtor */
-		explicit Request(dems::StageManager &stageManager, zia::server::SocketPtr &&);
+		explicit Request(dems::config::Config &config, dems::StageManager &stageManager, zia::server::SocketPtr &&);
 		~Request();
 
 		/* method */

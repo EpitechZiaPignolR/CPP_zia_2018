@@ -26,7 +26,6 @@ namespace zia::default_module {
 		context.rawData.clear();
 		for (auto &it : tmp)
 			context.rawData.push_back(it);
-		std::cout << tmp << std::endl;
 		return dems::CodeStatus::OK;
         }
 }

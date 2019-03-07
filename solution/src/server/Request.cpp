@@ -9,11 +9,12 @@
 #include "server/Request.hpp"
 
 namespace zia::server {
-	Request::Request(dems::StageManager &stageManager, zia::server::SocketPtr &&socket):
+	Request::Request(dems::config::Config &config, dems::StageManager &stageManager, zia::server::SocketPtr &&socket):
 	_socket(std::move(socket)),
 	_stageManager(stageManager),
 	_context()
 	{
+		_context.config = config;
 		_context.socketFd = _socket->native_handle();
 		std::cout << "Request: connection" << std::endl;
 		for (auto &func: _stageManager.connection().firstHooks())

@@ -19,7 +19,7 @@ namespace zia::default_module {
 		context.response = {
 			dems::header::Response{"HTTP/1.1", "404", "Not Found"},
 			nullptr,
-			"Page Not Found LoL"
+			"<head></head><body><h1>Page Not Found</h1></body>"
 		};
 		return dems::CodeStatus::OK;
 	}

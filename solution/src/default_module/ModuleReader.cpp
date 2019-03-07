@@ -17,7 +17,7 @@ namespace zia::default_module {
 	dems::CodeStatus ModuleReader(dems::Context &context)
 	{
 		constexpr size_t BUFFER_SIZE = 256;
-		unsigned char buffer[BUFFER_SIZE + 1];
+		unsigned char buffer[BUFFER_SIZE];
 		ssize_t readByte;
 		int flags;
 
