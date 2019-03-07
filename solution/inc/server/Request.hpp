@@ -16,6 +16,7 @@ namespace zia::server {
 		dems::StageManager &_stageManager;
 		dems::Context _context;
 
+		void handleChunks();
 	public:
 		/* Suppression des constructeur par copie */
 		Request& operator=(const Request &) = delete;

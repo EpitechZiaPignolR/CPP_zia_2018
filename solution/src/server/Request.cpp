@@ -6,6 +6,8 @@
 */
 
 #include <iostream>
+#include <boost/chrono.hpp>
+#include <boost/thread/thread.hpp>
 #include "server/Request.hpp"
 
 namespace zia::server {
@@ -23,6 +25,32 @@ namespace zia::server {
 			func.second.callback(_context);
 		for (auto &func: _stageManager.connection().endHooks())
 			func.second.callback(_context);
+		if ((*_context.request.headers)["Transfer-Encoding"] == "chunked")
+			handleChunks();
+	}
+
+	void Request::handleChunks()
+	{
+		std::size_t timeOut = 0;
+		std::size_t chunkSize = 0;
+		do {
+			for (auto &func: _stageManager.chunks().firstHooks())
+				func.second.callback(_context);
+			if (_context.rawData.empty()) {
+				boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
+				if (timeOut++ >= 3000)
+					break;
+				else
+					continue;
+			}
+			timeOut = 0;
+			// get chunksize;
+			chunkSize = 0;
+			for (auto &func: _stageManager.chunks().middleHooks())
+				func.second.callback(_context);
+			for (auto &func: _stageManager.chunks().endHooks())
+				func.second.callback(_context);
+		} while (chunkSize);
 	}
 
 	void Request::handleRequest()
