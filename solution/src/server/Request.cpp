@@ -25,8 +25,11 @@ namespace zia::server {
 			func.second.callback(_context);
 		for (auto &func: _stageManager.connection().endHooks())
 			func.second.callback(_context);
-		if ((*_context.request.headers)["Transfer-Encoding"] == "chunked")
-			handleChunks();
+		if (_context.request.headers) {
+			auto transferEncoding = (*_context.request.headers)["Transfer-Encoding"];
+			if (transferEncoding == "chunked")
+				handleChunks();
+		}
 	}
 
 	void Request::handleChunks()
