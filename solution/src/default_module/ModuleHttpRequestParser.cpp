@@ -8,18 +8,19 @@
 #include <cstdlib>
 #include <cstring>
 #include <boost/algorithm/string_regex.hpp>
-#include "html/HtmlRequestParser.hpp"
+#include "default_module/ModuleHttpRequestParser.hpp"
 
 namespace zia::html {
-	HtmlRequestParser::HtmlRequestParser(dems::Context &cont) : _length(0), _left(0), chunked(false), _cont(cont);
+	HtmlRequestParser::HtmlRequestParser(dems::Context &cont) :
+	_length(0), _left(0), _chunked(false), _cont(cont)
 	{
 		std::string data;
 
 		for (auto &x : _cont.rawData)
 			data += x;
-		_head._data = data;
-		boost::algorithm::split_regex(_heads, data, regex("\r\n"));
-		setHeader();
+		_rest = data;
+		boost::algorithm::split_regex(_heads, data, std::regex("\r\n"));
+		setRequest();
 	}
 
 	HtmlRequestParser::~HtmlRequestParser()

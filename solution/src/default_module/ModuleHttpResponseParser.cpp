@@ -8,10 +8,11 @@
 #include <cstdlib>
 #include <cstring>
 #include <boost/algorithm/string_regex.hpp>
-#include "html/HtmlResponseParser.hpp"
+#include "default_module/ModuleHttpResponseParser.hpp"
 
 namespace zia::html {
-	HtmlResponseParser::HtmlResponseParser(dems::Context &cont) : _length(0), _left(0), chunked(false), _cont(cont);
+	HtmlResponseParser::HtmlResponseParser(dems::Context &cont) :
+	_length(0), _left(0), _chunked(false), _cont(cont)
 	{
 		std::string data;
 

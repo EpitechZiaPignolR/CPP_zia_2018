@@ -8,7 +8,7 @@
 #pragma once
 
 #include "api/Stage.hpp"
-#include "html/Header.hpp"
+#include "server/Headers.hpp"
 
 namespace zia::html {
 	
@@ -17,12 +17,12 @@ namespace zia::html {
 		std::string _rest;
 		size_t _length;
 		size_t _left;
-		std::bool _chunked;
+		bool _chunked;
 		dems::Context &_cont;
 		std::vector<std::string> _heads;
 		dems::header::HTTPMessage _mess;
 		dems::header::Request _req;
-		Header _head;
+		zia::server::Headers _head;
 		//enlever le header du rawdata
 		void cleanRawData(int);
 

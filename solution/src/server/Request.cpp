@@ -9,15 +9,25 @@
 #include <boost/chrono.hpp>
 #include <boost/thread/thread.hpp>
 #include "server/Request.hpp"
+#include "server/Headers.hpp"
 
 namespace zia::server {
 	Request::Request(dems::config::Config &config, dems::StageManager &stageManager, zia::server::SocketPtr &&socket):
 	_socket(std::move(socket)),
 	_stageManager(stageManager),
-	_context()
+	_context(dems::Context{
+		std::vector<uint8_t>{},
+		dems::header::HTTPMessage{
+			dems::header::Request{"", "", ""},
+			std::make_unique<Headers>(),
+			"" },
+		dems::header::HTTPMessage{
+			dems::header::Response{"", "", ""},
+			std::make_unique<Headers>(),
+			"" },
+		_socket->native_handle(),
+		config })
 	{
-		_context.config = config;
-		_context.socketFd = _socket->native_handle();
 		std::cout << "Request: connection" << std::endl;
 		for (auto &func: _stageManager.connection().firstHooks())
 			func.second.callback(_context);
@@ -25,11 +35,9 @@ namespace zia::server {
 			func.second.callback(_context);
 		for (auto &func: _stageManager.connection().endHooks())
 			func.second.callback(_context);
-		if (_context.request.headers) {
-			auto transferEncoding = (*_context.request.headers)["Transfer-Encoding"];
-			if (transferEncoding == "chunked")
-				handleChunks();
-		}
+		auto transferEncoding = (*_context.request.headers)["Transfer-Encoding"];
+		if (transferEncoding == "chunked")
+			handleChunks();
 	}
 
 	void Request::handleChunks()
