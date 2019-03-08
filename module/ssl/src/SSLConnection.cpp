@@ -8,6 +8,10 @@
 #include <iostream>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <fcntl.h>
+#ifdef __linux__
+	#include <unistd.h>
+#endif
 #include "SSLConnection.hpp"
 
 namespace zia::ssl_module {
@@ -51,8 +55,7 @@ namespace zia::ssl_module {
 
 	bool SSLConnection::init_SSL_CTX()
 	{
-		const SSL_METHOD *meth = DTLSv1_method();
-		_ssl_ctx = SSL_CTX_new(meth);
+		_ssl_ctx = SSL_CTX_new(SSLv23_server_method());
 		if (!_ssl_ctx) {
 			std::cerr << "Error SSL: SSL_CTX_new" << std::endl;
 			return true;
@@ -99,36 +102,23 @@ namespace zia::ssl_module {
 			return true;
 		}
 
-		/* bios */
-		_in_bio = BIO_new(BIO_s_mem());
-		if(_in_bio == NULL) {
-			printf("Error: cannot allocate read bio.\n");
-			return -2;
-		}
-		BIO_set_mem_eof_return(_in_bio, -1);
-
-		_out_bio = BIO_new(BIO_s_mem());
-		if(_out_bio == NULL) {
-			printf("Error new BIO out: cannot allocate write bio.\n");
-			return -3;
-		}
-		BIO_set_mem_eof_return(_out_bio, -1);
-
-		SSL_set_bio(_ssl, _in_bio, _out_bio);
-
-
 		SSL_set_accept_state(_ssl);
-
-		SSL_set_fd(_ssl, _context.socketFd);
-		int ret = SSL_connect(_ssl);
-		if (!ret) {
-			std::cerr << "Error: SSL Connect" << std::endl;
+		if (!SSL_is_server(_ssl)) {
+			std::cerr << "Error: SSL is not server" << std::endl;
 			return true;
 		}
-		if (ret < 0) {
+
+		if (SSL_set_fd(_ssl, _context.socketFd) <= 0) {
+			std::cerr << "Error: SSL set fd" << std::endl;
+			return true;
+		}
+		int ret = SSL_accept(_ssl);
+		if (!ret) {
+			std::cerr << "Error: SSL accept" << std::endl;
+			return true;
+		} else if (ret < 0) {
 			char msg[1024];
-			int err = SSL_get_error(_ssl, ret);
-			switch (err) {
+			switch (SSL_get_error(_ssl, ret)) {
 			case SSL_ERROR_WANT_WRITE:
 				std::cerr << "Error in init_SSL: SSL_ERROR_WANT_WRITE" << std::endl;
 				return true;
@@ -150,7 +140,15 @@ namespace zia::ssl_module {
 				return true;
 			}
 		}
-		return false;
+#ifdef WIN32
+		unsigned long mode = 1;
+		return static_cast<boost>(ioctlsocket(_context.socketFd, FIONBIO, &mode));
+#else
+		int flags = fcntl(_context.socketFd, F_GETFL, 0);
+		if (flags < 0)
+			return false;
+		return static_cast<bool>(fcntl(_context.socketFd, F_SETFL, flags | O_NONBLOCK));
+#endif
 	}
 
 	SSLConnection::SSLConnection(dems::Context &context):
@@ -158,9 +156,7 @@ namespace zia::ssl_module {
 	_certificate(),
 	_certificate_key(),
 	_ssl(nullptr),
-	_ssl_ctx(nullptr),
-	_in_bio(nullptr),
-	_out_bio(nullptr)
+	_ssl_ctx(nullptr)
 	{
 		if (_context.config.count("is_ssl"))
 			_is_ssl = std::get<bool>(_context.config["is_ssl"].v);
@@ -168,10 +164,9 @@ namespace zia::ssl_module {
 			_is_ssl = check_is_ssl();
 		if (!_is_ssl)
 			return;
-		if (init_SSL_CTX() || init_SSL() || (!SSL_is_init_finished(_ssl) && SSL_do_handshake(_ssl))) {
+		if (init_SSL_CTX() || init_SSL()) {
 			_is_ssl = false;
 			_context.config["is_ssl"].v = false;
-			return;
 		}
 	}
 
@@ -188,10 +183,9 @@ namespace zia::ssl_module {
 
 	bool SSLConnection::is_ssl() const
 	{
+		std::cout <<_is_ssl<< std::endl;
 		return _is_ssl;
 	}
-
-
 
 	bool SSLConnection::read()
 	{

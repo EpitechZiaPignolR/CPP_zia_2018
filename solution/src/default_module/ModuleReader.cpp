@@ -8,10 +8,9 @@
 #include <iostream>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <fcntl.h>
 #ifdef __linux__
-	#include <sys/types.h>
 	#include <unistd.h>
-	#include <fcntl.h>
 #endif
 #include "default_module/ModuleReader.hpp"
 

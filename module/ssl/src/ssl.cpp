@@ -5,6 +5,7 @@
 ** ssl.cpp
 */
 
+#include <iostream>
 #include "SSLConnection.hpp"
 
 namespace zia::ssl_module {

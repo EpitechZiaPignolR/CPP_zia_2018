@@ -19,8 +19,6 @@ namespace zia::ssl_module {
 
 		SSL *_ssl;
 		SSL_CTX *_ssl_ctx;
-		BIO *_in_bio;
-		BIO *_out_bio;
 
 		bool _is_ssl;
 
