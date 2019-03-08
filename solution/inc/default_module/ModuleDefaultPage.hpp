@@ -13,7 +13,7 @@ namespace zia::default_module {
 	dems::CodeStatus ModuleDefaultPage(dems::Context &context);
 
 	inline std::string registerDefaultPageHooks(dems::StageManager &manager) {
-		manager.request().hookToEnd(99999, "DefaultPage", ModuleDefaultPage);
+		manager.request().hookToMiddle(100000, "DefaultPage", ModuleDefaultPage);
 		return "DefaultPage";
 	}
 }

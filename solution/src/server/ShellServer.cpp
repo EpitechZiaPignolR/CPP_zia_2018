@@ -66,6 +66,7 @@ namespace zia::server {
 					try {
 						Request request(config, stageManager, std::move(socket));
 						request.handleRequest();
+						request.handleDisconnect();
 					}
 					catch (const std::exception &e){
 						std::cerr << "Error in Request socket: " << e.what() << std::endl;

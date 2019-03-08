@@ -67,7 +67,7 @@ namespace zia::server {
 			func.second.callback(_context);
 	}
 
-	Request::~Request()
+	void Request::handleDisconnect()
 	{
 		std::cout << "Request: disconnect" << std::endl;
 		for (auto &func: _stageManager.disconnect().firstHooks())
@@ -76,6 +76,8 @@ namespace zia::server {
 			func.second.callback(_context);
 		for (auto &func: _stageManager.disconnect().endHooks())
 			func.second.callback(_context);
-
 	}
+
+	Request::~Request()
+	{}
 }

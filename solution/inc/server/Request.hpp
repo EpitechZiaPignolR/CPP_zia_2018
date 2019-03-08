@@ -28,5 +28,6 @@ namespace zia::server {
 
 		/* method */
 		void handleRequest();
+		void handleDisconnect();
 	};
 }

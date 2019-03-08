@@ -6,6 +6,8 @@
 */
 
 #include <iostream>
+#include <sys/types.h>
+#include <sys/socket.h>
 #ifdef __linux__
 	#include <sys/types.h>
 	#include <unistd.h>
@@ -14,6 +16,15 @@
 #include "default_module/ModuleReader.hpp"
 
 namespace zia::default_module {
+	bool is_readable(dems::Context &context)
+	{
+		char c;
+
+		// check if the first character is uppercase letter
+		recv(context.socketFd, &c, 1, MSG_PEEK);
+		return std::isupper(c);
+	}
+
 	dems::CodeStatus ModuleReader(dems::Context &context)
 	{
 		constexpr size_t BUFFER_SIZE = 256;
@@ -21,7 +32,7 @@ namespace zia::default_module {
 		ssize_t readByte;
 		int flags;
 
-		if (!context.rawData.empty())
+		if (!context.rawData.empty() && !is_readable(context))
 			return dems::CodeStatus::OK;
 #ifdef __linux__
 		// récupère les flags du fd
@@ -62,9 +73,6 @@ namespace zia::default_module {
 		flags = 0;
 		ioctlsocket(socket, FIONBIO, &flags);
 #endif
-		std::string tmp;
-		for (auto &it: context.rawData)
-			tmp += it;
 		return dems::CodeStatus::OK;
 	}
 }
