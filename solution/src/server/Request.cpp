@@ -74,7 +74,6 @@ namespace zia::server {
 	void Request::handleRequest()
 	{
 		std::cout << "Request: handle request" << std::endl;
-		std::cout << std::endl;
 		_context.rawData.clear();
 		for (auto &func: _stageManager.request().firstHooks()) {
 			std::cout << func.second.moduleName << std::endl;
