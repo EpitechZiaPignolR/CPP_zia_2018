@@ -13,6 +13,11 @@
 
 namespace zia::ssl_module {
 	class SSLConnection {
+		constexpr static char CONF_SSL_PTR[] = "SSL_ptr";
+		constexpr static char CONF_SSL_CTX[] = "SSL_ctx";
+		constexpr static char CONF_IS_SSL[] = "is_SSL";
+
+
 		dems::Context &_context;
 		std::string _certificate;
 		std::string _certificate_key;
@@ -34,5 +39,7 @@ namespace zia::ssl_module {
 		bool write();
 
 		bool isSSL() const;
+
+		void disconnect();
 	};
 }
