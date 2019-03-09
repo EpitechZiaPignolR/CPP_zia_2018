@@ -35,7 +35,7 @@ namespace zia::server {
 			func.second.callback(_context);
 		for (auto &func: _stageManager.connection().endHooks())
 			func.second.callback(_context);
-		auto transferEncoding = (*_context.request.headers)["Transfer-Encoding"];
+		const auto &transferEncoding = (*_context.request.headers).getHeader("Transfer-Encoding");
 		if (transferEncoding == "chunked")
 			handleChunks();
 	}

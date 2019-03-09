@@ -4,10 +4,13 @@
 ** File description:
 ** Headers.cpp
 */
-
+#include <iostream>
 #include "server/Headers.hpp"
 
 namespace zia::server {
+	Headers::Headers(): _content(), _dummy()
+	{}
+
 	std::string			&Headers::operator[](const std::string &headerName)
 	{
 		return (_content[headerName]);
@@ -15,7 +18,11 @@ namespace zia::server {
 
 	std::string const	&Headers::getHeader(const std::string &headerName) const
 	{
-		return (_content.at(headerName));
+		if (_content.count(headerName))
+			return _content.at(headerName);
+		else
+			return _dummy;
+		
 	}
 
 	std::string			Headers::getWholeHeaders() const

@@ -13,8 +13,9 @@ namespace zia::server {
 	class Headers : public dems::header::IHeaders
 	{
 		std::map<std::string, std::string> _content;
+		std::string _dummy;
 	public:
-		Headers() = default;
+		Headers();
 		~Headers() = default;
 
 		std::string &operator[](const std::string &headerName);

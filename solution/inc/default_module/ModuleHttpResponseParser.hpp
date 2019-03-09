@@ -2,7 +2,7 @@
 ** EPITECH PROJECT, 2021
 ** zia
 ** File description:
-** HtmlResponseParser.hpp
+** HttpResponseParser.hpp
 */
 
 #pragma once
@@ -10,9 +10,11 @@
 #include "api/Stage.hpp"
 #include "server/Headers.hpp"
 
-namespace zia::html {
+namespace zia::default_module {
+
+	dems::CodeStatus HttpResponse(dems::Context &cont);
 	
-	class HtmlResponseParser
+	class HttpResponseParser
 	{
 		std::string _rest;
 		size_t _length;
@@ -22,19 +24,24 @@ namespace zia::html {
 		std::vector<std::string> _heads;
 		dems::header::HTTPMessage _mess;
 		dems::header::Response _res;
-		zia::server::Headers _head;
 		//enlever le header du rawdata
 		void cleanRawData(int);
 
 	public:
-		HtmlResponseParser(dems::Context &cont);
-		~HtmlResponseParser();
+		HttpResponseParser(dems::Context &cont);
+		~HttpResponseParser();
 
 		dems::CodeStatus setResponse();
 		//remettre tout en string et en fonction de chunked ou pas choisir la bonne fonction
 		dems::CodeStatus getChunk(std::vector<uint8_t> &data);
-		size_t getChunkSize(std::vector<uint8_t> &data);
+		ssize_t getChunkSize(std::string &body);
 		dems::CodeStatus getStandardBody(std::vector<uint8_t> &data);
-		static int checkFirstline(std::string &);
+		static void mySplit(std::vector<std::string> &dest, std::string &line, std::string const &delim);
+		static int checkFirstline(std::string &, dems::Context &);
 	};
+
+	inline std::string registerHttpResponseHooks(dems::StageManager &manager) {
+		manager.request().hookToEnd(99999, "HttpResponse", HttpResponse);
+		return "HttpResponse";
+	}
 }
