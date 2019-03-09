@@ -91,17 +91,13 @@ namespace zia::dlloader {
 
 	void ModulesManager::loadConfig(const dems::config::Config &config)
 	{
-		if (!config.count("modules")) {
-			loadBasicModules();
-		} else {
-			try {
-				// get modules config
-				auto modulesConfig = std::get<dems::config::ConfigObject>
-					(config.at("modules").v);
-				loadModulesFromConfig(modulesConfig);
-			}
-			catch (const std::bad_variant_access&) {
-			}
+		try {
+			// get modules config
+			auto modulesConfig = std::get<dems::config::ConfigObject>
+				(config.at("modules").v);
+			loadModulesFromConfig(modulesConfig);
+		}
+		catch (const std::bad_variant_access&) {
 		}
 	}
 
@@ -116,6 +112,7 @@ namespace zia::dlloader {
 		_modules.clear();
 
 		/* load new config */
+		loadBasicModules();
 		loadConfig(config);
 		std::cout << "Modules is reloaded." << std::endl;
 	}
@@ -123,6 +120,7 @@ namespace zia::dlloader {
 	ModulesManager::ModulesManager(const dems::config::Config &config)
 	: ModulesManager()
 	{
+		loadBasicModules();
 		loadConfig(config);
 	}
 
