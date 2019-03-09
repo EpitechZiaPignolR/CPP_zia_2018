@@ -19,43 +19,40 @@ namespace zia::ssl_module {
 		return 1;
 	}
 
-	bool SSLConnection::check_is_ssl()
+	bool SSLConnection::initCertificate()
 	{
-		char c;
-
 		// check certificate
 		try {
-			if (!_context.config.count("modules")) {
-				_context.config["is_ssl"].v = false;
-				return false;
-			}
+			if (!_context.config.count("modules"))
+				return true;
 			auto &confModule = std::get<dems::config::ConfigObject>(_context.config["modules"].v);
-			if (!confModule.count("SSL")) {
-				_context.config["is_ssl"].v = false;
-				return false;
-			}
+			if (!confModule.count("SSL"))
+				return true;
 			auto &confSSL = std::get<dems::config::ConfigObject>(confModule["SSL"].v);
-			if (!confSSL.count("certificate") || !confSSL.count("certificate-key")) {
-				_context.config["is_ssl"].v = false;
-				return false;
-			}
+			if (!confSSL.count("certificate") || !confSSL.count("certificate-key"))
+				return true;
 			_certificate = std::get<std::string>(confSSL["certificate"].v);
 			_certificate_key = std::get<std::string>(confSSL["certificate-key"].v);
 		} catch (std::exception &) {
-			_context.config["is_ssl"].v = false;
-			return false;
+			return true;
 		}
+		return false;
+	}
+
+	bool SSLConnection::checkIsSSL()
+	{
+		char c;
 
 		// check if the first character is uppercase letter
 		recv(_context.socketFd, &c, 1, MSG_PEEK);
 		bool is_ssl = !std::isupper(c);
-		_context.config["is_ssl"].v = is_ssl;
+		_context.config["isSSL"].v = is_ssl;
 		return is_ssl;
 	}
 
-	bool SSLConnection::init_SSL_CTX()
+	bool SSLConnection::initSSL_CTX()
 	{
-		_ssl_ctx = SSL_CTX_new(SSLv23_server_method());
+		_ssl_ctx = SSL_CTX_new(TLSv1_2_server_method());
 		if (!_ssl_ctx) {
 			std::cerr << "Error SSL: SSL_CTX_new" << std::endl;
 			return true;
@@ -94,7 +91,7 @@ namespace zia::ssl_module {
 		return false;
 	}
 
-	bool SSLConnection::init_SSL()
+	bool SSLConnection::initSSL()
 	{
 		_ssl = SSL_new(_ssl_ctx);
 		if (!_ssl) {
@@ -142,13 +139,16 @@ namespace zia::ssl_module {
 		}
 #ifdef WIN32
 		unsigned long mode = 1;
-		return static_cast<boost>(ioctlsocket(_context.socketFd, FIONBIO, &mode));
+		if (static_cast<boost>(ioctlsocket(_context.socketFd, FIONBIO, &mode)))
+			return true;
 #else
 		int flags = fcntl(_context.socketFd, F_GETFL, 0);
 		if (flags < 0)
-			return false;
-		return static_cast<bool>(fcntl(_context.socketFd, F_SETFL, flags | O_NONBLOCK));
+			return true;
+		if (static_cast<bool>(fcntl(_context.socketFd, F_SETFL, flags | O_NONBLOCK)))
+			return true;
 #endif
+		return false;
 	}
 
 	SSLConnection::SSLConnection(dems::Context &context):
@@ -158,15 +158,13 @@ namespace zia::ssl_module {
 	_ssl(nullptr),
 	_ssl_ctx(nullptr)
 	{
-		if (_context.config.count("is_ssl"))
-			_is_ssl = std::get<bool>(_context.config["is_ssl"].v);
+		if (_context.config.count("isSSL"))
+			_is_ssl = std::get<bool>(_context.config["isSSL"].v);
 		else
-			_is_ssl = check_is_ssl();
-		if (!_is_ssl)
-			return;
-		if (init_SSL_CTX() || init_SSL()) {
+			_is_ssl = checkIsSSL();
+		if (!_is_ssl || initCertificate() || initSSL_CTX() || initSSL()) {
 			_is_ssl = false;
-			_context.config["is_ssl"].v = false;
+			_context.config["isSSL"].v = false;
 		}
 	}
 
@@ -181,37 +179,39 @@ namespace zia::ssl_module {
 		}
 	}
 
-	bool SSLConnection::is_ssl() const
+	bool SSLConnection::isSSL() const
 	{
-		std::cout <<_is_ssl<< std::endl;
 		return _is_ssl;
 	}
 
 	bool SSLConnection::read()
 	{
-		constexpr size_t BUFFER_SIZE = 256;
 		int readByte;
+		constexpr size_t BUFFER_SIZE = 256;
 		uint8_t buffer[BUFFER_SIZE];
 
+		std::cout << "-----------read----------" << std::endl;
 		while ((readByte = SSL_read(_ssl, buffer, BUFFER_SIZE)) > 0) {
-			if (readByte < 0) {
-				break;
-			}
 			for (int i = 0; i < readByte; ++i) {
 				_context.rawData.push_back(buffer[i]);
+				std::cout << buffer[i];
 			}
 		}
+		std::cout << "-----------read end---------- " << readByte <<std::endl;
 		if (readByte < 0) {
 			int err = SSL_get_error(_ssl, readByte);
 			switch (err) {
 			case SSL_ERROR_WANT_WRITE:
+				std::cout << "write" << std::endl;
 				return false;
 			case SSL_ERROR_WANT_READ:
+				std::cout << "read" << std::endl;
 				return false;
 			case SSL_ERROR_ZERO_RETURN:
 			case SSL_ERROR_SYSCALL:
 			case SSL_ERROR_SSL:
 			default:
+				std::cout << "rcqzdcsdcqd" <<std::endl;
 				return true;
 			}
 		}
@@ -220,11 +220,9 @@ namespace zia::ssl_module {
 
 	bool SSLConnection::write()
 	{
-		std::cout << "----SSL WRITE----" << std::endl;
 		auto size = static_cast<int>(_context.rawData.size() * sizeof(uint8_t));
 		int err = SSL_write(_ssl, _context.rawData.data(), size);
 		_context.rawData.clear();
-		std::cout << "----SSL WRITE END----" << std::endl;
 		if (err < 0) {
 			err = SSL_get_error(_ssl, err);
 			switch (err) {

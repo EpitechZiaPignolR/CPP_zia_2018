@@ -22,9 +22,10 @@ namespace zia::ssl_module {
 
 		bool _is_ssl;
 
-		bool check_is_ssl();
-		bool init_SSL_CTX();
-		bool init_SSL();
+		bool initCertificate();
+		bool checkIsSSL();
+		bool initSSL_CTX();
+		bool initSSL();
 	public:
 		explicit SSLConnection(dems::Context &);
 		~SSLConnection();
@@ -32,6 +33,6 @@ namespace zia::ssl_module {
 		bool read();
 		bool write();
 
-		bool is_ssl() const;
+		bool isSSL() const;
 	};
 }

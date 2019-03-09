@@ -13,7 +13,7 @@ namespace zia::ssl_module {
 	dems::CodeStatus ModuleReadSSL(dems::Context &context)
 	{
 		SSLConnection sslConnection(context);
-		if (!sslConnection.is_ssl())
+		if (!sslConnection.isSSL())
 			return dems::CodeStatus::HTTP_ERROR;
 		sslConnection.read();
 		return dems::CodeStatus::OK;
@@ -22,7 +22,7 @@ namespace zia::ssl_module {
 	dems::CodeStatus ModuleWriteSSL(dems::Context &context)
 	{
 		SSLConnection sslConnection(context);
-		if (!sslConnection.is_ssl())
+		if (!sslConnection.isSSL())
 			return dems::CodeStatus::HTTP_ERROR;
 		sslConnection.write();
 		return dems::CodeStatus::OK;
