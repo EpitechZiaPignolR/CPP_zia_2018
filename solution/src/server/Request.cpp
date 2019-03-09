@@ -9,31 +9,46 @@
 #include <boost/chrono.hpp>
 #include <boost/thread/thread.hpp>
 #include "server/Request.hpp"
+#include "server/Headers.hpp"
 
 namespace zia::server {
 	Request::Request(dems::config::Config &config, dems::StageManager &stageManager, zia::server::SocketPtr &&socket):
 	_socket(std::move(socket)),
 	_stageManager(stageManager),
-	_context()
+	_context(dems::Context{
+		std::vector<uint8_t>{},
+		dems::header::HTTPMessage{
+			dems::header::Request{"", "", ""},
+			std::make_unique<Headers>(),
+			"" },
+		dems::header::HTTPMessage{
+			dems::header::Response{"", "", ""},
+			std::make_unique<Headers>(),
+			"" },
+		_socket->native_handle(),
+		config })
 	{
-		_context.config = config;
-		_context.socketFd = _socket->native_handle();
 		std::cout << "Request: connection" << std::endl;
-		for (auto &func: _stageManager.connection().firstHooks())
+		for (auto &func: _stageManager.connection().firstHooks()) {
+			std::cout << func.second.moduleName << std::endl;
 			func.second.callback(_context);
-		for (auto &func: _stageManager.connection().middleHooks())
-			func.second.callback(_context);
-		for (auto &func: _stageManager.connection().endHooks())
-			func.second.callback(_context);
-		if (_context.request.headers) {
-			auto transferEncoding = (*_context.request.headers)["Transfer-Encoding"];
-			if (transferEncoding == "chunked")
-				handleChunks();
 		}
+		for (auto &func: _stageManager.connection().middleHooks()) {
+			std::cout << func.second.moduleName << std::endl;
+			func.second.callback(_context);
+		}
+		for (auto &func: _stageManager.connection().endHooks()) {
+			std::cout << func.second.moduleName << std::endl;
+			func.second.callback(_context);
+		}
+		const auto &transferEncoding = (*_context.request.headers).getHeader("Transfer-Encoding");
+		if (transferEncoding == "chunked")
+			handleChunks();
 	}
 
 	void Request::handleChunks()
 	{
+		std::cout << "Request: Chunk" << std::endl;
 		std::size_t timeOut = 0;
 		std::size_t chunkSize = 0;
 		do {
@@ -59,25 +74,36 @@ namespace zia::server {
 	void Request::handleRequest()
 	{
 		std::cout << "Request: handle request" << std::endl;
-		for (auto &func: _stageManager.request().firstHooks())
+		std::cout << std::endl;
+		_context.rawData.clear();
+		for (auto &func: _stageManager.request().firstHooks()) {
+			std::cout << func.second.moduleName << std::endl;
 			func.second.callback(_context);
-		for (auto &func: _stageManager.request().middleHooks())
+		}
+		for (auto &func: _stageManager.request().middleHooks()) {
+			std::cout << func.second.moduleName << std::endl;
 			func.second.callback(_context);
-		for (auto &func: _stageManager.request().endHooks())
+		}
+		for (auto &func: _stageManager.request().endHooks()) {
+			std::cout << func.second.moduleName << std::endl;
 			func.second.callback(_context);
+		}
 	}
 
 	void Request::handleDisconnect()
 	{
 		std::cout << "Request: disconnect" << std::endl;
-		for (auto &func: _stageManager.disconnect().firstHooks())
+		for (auto &func: _stageManager.disconnect().firstHooks()) {
+			std::cout << func.second.moduleName << std::endl;
 			func.second.callback(_context);
-		for (auto &func: _stageManager.disconnect().middleHooks())
+		}
+		for (auto &func: _stageManager.disconnect().middleHooks()) {
+			std::cout << func.second.moduleName << std::endl;
 			func.second.callback(_context);
-		for (auto &func: _stageManager.disconnect().endHooks())
+		}
+		for (auto &func: _stageManager.disconnect().endHooks()) {
+			std::cout << func.second.moduleName << std::endl;
 			func.second.callback(_context);
+		}
 	}
-
-	Request::~Request()
-	{}
 }

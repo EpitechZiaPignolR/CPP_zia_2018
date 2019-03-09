@@ -114,7 +114,11 @@ namespace zia::server {
 		_acceptor.listen();
 
 		waitForConnection(cb);
-		_io_thread = boost::thread(boost::bind(&boost::asio::io_service::run, &_io_service));
+		_io_thread = boost::thread([this](){
+			try {
+				_io_service.run();
+			} catch (std::exception &){}
+		});
 		std::cout << "Server is running" << std::endl;
 	}
 

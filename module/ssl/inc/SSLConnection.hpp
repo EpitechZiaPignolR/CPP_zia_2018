@@ -17,7 +17,6 @@ namespace zia::ssl_module {
 		constexpr static char CONF_SSL_CTX[] = "SSL_ctx";
 		constexpr static char CONF_IS_SSL[] = "is_SSL";
 
-
 		dems::Context &_context;
 		std::string _certificate;
 		std::string _certificate_key;

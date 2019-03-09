@@ -15,6 +15,8 @@
 #include "default_module/ModuleWriter.hpp"
 #include "default_module/ModuleDefaultPage.hpp"
 #include "default_module/ModuleHttpService.hpp"
+#include "default_module/ModuleHttpRequestParser.hpp"
+#include "default_module/ModuleHttpResponseParser.hpp"
 
 namespace zia::dlloader {
 	void ModulesManager::loadModules(const std::string &directoryPath)
@@ -52,6 +54,8 @@ namespace zia::dlloader {
 		zia::default_module::registerContextConverterHooks(getStageManager());
 		zia::default_module::registerDefaultPageHooks(getStageManager());
 		zia::default_module::registerHttpServiceHooks(getStageManager());
+		zia::default_module::registerHttpResponseHooks(getStageManager());
+		zia::default_module::registerHttpRequestHooks(getStageManager());
 
 		std::cout << "End of loading basic modules..." << std::endl;
 	}
@@ -91,17 +95,13 @@ namespace zia::dlloader {
 
 	void ModulesManager::loadConfig(const dems::config::Config &config)
 	{
-		if (!config.count("modules")) {
-			loadBasicModules();
-		} else {
-			try {
-				// get modules config
-				auto modulesConfig = std::get<dems::config::ConfigObject>
-					(config.at("modules").v);
-				loadModulesFromConfig(modulesConfig);
-			}
-			catch (const std::bad_variant_access&) {
-			}
+		try {
+			// get modules config
+			auto modulesConfig = std::get<dems::config::ConfigObject>
+				(config.at("modules").v);
+			loadModulesFromConfig(modulesConfig);
+		}
+		catch (const std::bad_variant_access&) {
 		}
 	}
 
@@ -116,6 +116,7 @@ namespace zia::dlloader {
 		_modules.clear();
 
 		/* load new config */
+		loadBasicModules();
 		loadConfig(config);
 		std::cout << "Modules is reloaded." << std::endl;
 	}
