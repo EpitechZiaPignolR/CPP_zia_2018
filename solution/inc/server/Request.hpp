@@ -24,7 +24,7 @@ namespace zia::server {
 
 		/* ctor and dtor */
 		explicit Request(dems::config::Config &config, dems::StageManager &stageManager, zia::server::SocketPtr &&);
-		~Request();
+		~Request() = default;
 
 		/* method */
 		void handleRequest();

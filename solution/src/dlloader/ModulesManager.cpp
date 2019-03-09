@@ -15,6 +15,8 @@
 #include "default_module/ModuleWriter.hpp"
 #include "default_module/ModuleDefaultPage.hpp"
 #include "default_module/ModuleHttpService.hpp"
+#include "default_module/ModuleHttpRequestParser.hpp"
+#include "default_module/ModuleHttpResponseParser.hpp"
 
 namespace zia::dlloader {
 	void ModulesManager::loadModules(const std::string &directoryPath)
@@ -52,6 +54,8 @@ namespace zia::dlloader {
 		zia::default_module::registerContextConverterHooks(getStageManager());
 		zia::default_module::registerDefaultPageHooks(getStageManager());
 		zia::default_module::registerHttpServiceHooks(getStageManager());
+		zia::default_module::registerHttpResponseHooks(getStageManager());
+		zia::default_module::registerHttpRequestHooks(getStageManager());
 
 		std::cout << "End of loading basic modules..." << std::endl;
 	}
@@ -120,7 +124,6 @@ namespace zia::dlloader {
 	ModulesManager::ModulesManager(const dems::config::Config &config)
 	: ModulesManager()
 	{
-		loadBasicModules();
 		loadConfig(config);
 	}
 

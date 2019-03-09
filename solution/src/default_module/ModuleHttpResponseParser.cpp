@@ -48,7 +48,7 @@ namespace zia::default_module {
 		_heads.erase(_heads.begin());
 		for (i = 0; i < _heads.size(); ++i)
 		{
-			if (_heads[i].compare(""))
+			if (_heads[i] == "")
 				break;
 			zia::default_module::HttpResponseParser::mySplit(line, _heads[i], "\r\n");
 			if (line[0].compare("Content-Length"))

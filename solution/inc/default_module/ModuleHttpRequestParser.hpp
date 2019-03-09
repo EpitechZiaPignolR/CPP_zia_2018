@@ -41,7 +41,7 @@ namespace zia::default_module {
 	};
 
 	inline std::string registerHttpRequestHooks(dems::StageManager &manager) {
-		manager.request().hookToFirst(0, "HttpRequest", HttpRequest);
+		manager.connection().hookToEnd(200000, "HttpRequest", HttpRequest);
 		return "HttpRequest";
 	}
 }
