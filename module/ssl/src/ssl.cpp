@@ -47,7 +47,7 @@ extern "C" {
 		manager.connection().hookToEnd(0, "SSL Read", zia::ssl_module::ModuleReadSSL);
 		manager.chunks().hookToFirst(0, "SSL Read", zia::ssl_module::ModuleReadSSL);
 		manager.disconnect().hookToFirst(90000, "SSL Write", zia::ssl_module::ModuleWriteSSL);
-		manager.disconnect().hookToEnd(0, "SSL Disconnect", zia::ssl_module::ModuleDisconnectSSL);
+		manager.disconnect().hookToMiddle(0, "SSL Disconnect", zia::ssl_module::ModuleDisconnectSSL);
 		return "SSL";
 	}
 }

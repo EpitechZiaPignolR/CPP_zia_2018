@@ -135,6 +135,21 @@ namespace zia::ssl_module {
 				return true;
 			}
 		}
+		// Bloque jusqu'a ce que des données entrent
+		char c;
+		recv(_context.socketFd, &c, 1, MSG_PEEK);
+		// Rend la socket non-bloquante
+#ifdef WIN32
+		unsigned long mode = 1;
+			if (static_cast<boost>(ioctlsocket(_context.socketFd, FIONBIO, &mode)))
+			return true;
+#else
+		int flags = fcntl(_context.socketFd, F_GETFL, 0);
+		if (flags < 0)
+			return true;
+		if (static_cast<bool>(fcntl(_context.socketFd, F_SETFL, flags | O_NONBLOCK)))
+			return true;
+#endif
 		return false;
 	}
 
@@ -179,21 +194,6 @@ namespace zia::ssl_module {
 		constexpr size_t BUFFER_SIZE = 256;
 		uint8_t buffer[BUFFER_SIZE];
 
-		// Bloque jusqu'a ce que des donnée entre (tant qu'il est non-bloquant)
-		char c;
-		recv(_context.socketFd, &c, 1, MSG_PEEK);
-		// Rend la socket non-bloquante
-#ifdef WIN32
-		unsigned long mode = 1;
-			if (static_cast<boost>(ioctlsocket(_context.socketFd, FIONBIO, &mode)))
-			return true;
-#else
-		int flags = fcntl(_context.socketFd, F_GETFL, 0);
-		if (flags < 0)
-			return true;
-		if (static_cast<bool>(fcntl(_context.socketFd, F_SETFL, flags | O_NONBLOCK)))
-			return true;
-#endif
 		// read
 		while ((readByte = SSL_read(_ssl, buffer, BUFFER_SIZE)) > 0) {
 			for (int i = 0; i < readByte; ++i) {
@@ -245,9 +245,17 @@ namespace zia::ssl_module {
 		if (_ssl) {
 			SSL_shutdown(_ssl);
 			SSL_free(_ssl);
+			_ssl = nullptr;
+			_context.config[CONF_SSL_PTR].v = 0ll;
 		}
 		if (_ssl_ctx) {
 			SSL_CTX_free(_ssl_ctx);
+			_ssl_ctx = nullptr;
+			_context.config[CONF_SSL_CTX].v = 0ll;
+		}
+		if (_is_ssl) {
+			_is_ssl = false;
+			_context.config[CONF_IS_SSL].v = false;
 		}
 	}
 
