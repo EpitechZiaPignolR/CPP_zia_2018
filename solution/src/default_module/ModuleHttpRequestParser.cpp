@@ -80,10 +80,11 @@ namespace zia::default_module {
 		return (dems::CodeStatus::OK);
 	}
 
-	void HttpRequestParser::cleanRawData(int i)
+	void HttpRequestParser::cleanRawData(size_t i)
 	{
 		_rest.clear();
-		_heads.erase(_heads.begin(), _heads.begin() + i);
+		if (i <= _heads.size())
+			_heads.erase(_heads.begin(), _heads.begin() + i);
 		for (auto & line : _heads)
 		{
 			_rest += line;

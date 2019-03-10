@@ -26,7 +26,7 @@ namespace zia::default_module {
 		dems::header::HTTPMessage _mess;
 		dems::header::Request _req;
 		//enlever le header du rawdata
-		void cleanRawData(int);
+		void cleanRawData(size_t);
 
 	public:
 		HttpRequestParser(dems::Context &cont);

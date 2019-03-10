@@ -5,6 +5,7 @@
 ** HttpResponseParser.cpp
 */
 
+#include <iostream>
 #include <cstdlib>
 #include <cstring>
 #include <variant>
@@ -15,7 +16,6 @@ namespace zia::default_module {
 	dems::CodeStatus HttpResponse(dems::Context &cont)
 	{
 		HttpResponseParser response(cont);
-
 		auto ret = response.setResponse();
 		return (ret);
 	}
@@ -47,7 +47,8 @@ namespace zia::default_module {
 	}
 
 	HttpResponseParser::~HttpResponseParser()
-	{ }
+	{
+	}
 
 	dems::CodeStatus HttpResponseParser::setResponse()
 	{
@@ -55,9 +56,13 @@ namespace zia::default_module {
 		std::vector<std::string> line;
 
 		if (!_heads.size())
+		{
 			return dems::CodeStatus::DECLINED;
+		}
 		if (zia::default_module::HttpResponseParser::checkFirstline(_heads[0], _cont) == 1)
+		{
 			return (dems::CodeStatus::HTTP_ERROR);
+		}
 		_heads.erase(_heads.begin());
 		for (i = 0; i < _heads.size(); ++i)
 		{
@@ -76,14 +81,17 @@ namespace zia::default_module {
 		}
 		cleanRawData(++i);
 		if (_chunked == false)
+		{
 			getStandardBody(_cont.rawData);
+		}
 		return (dems::CodeStatus::OK);
 	}
 
-	void HttpResponseParser::cleanRawData(int i)
+	void HttpResponseParser::cleanRawData(size_t i)
 	{
 		_rest.clear();
-		_heads.erase(_heads.begin(), _heads.begin() + i);
+		if (i <= _heads.size())
+			_heads.erase(_heads.begin(), _heads.begin() + i);
 		for (auto & line : _heads)
 		{
 			_rest += line;
@@ -149,7 +157,9 @@ namespace zia::default_module {
 		for (auto & c : data)
 			body += c;
 		if (_length != 0 && _length != body.length())
+		{
 			return (dems::CodeStatus::DECLINED);
+		}
 		_cont.response.body = body;
 		data.clear();
 		return (dems::CodeStatus::OK);
@@ -179,7 +189,9 @@ namespace zia::default_module {
 			}
 		}
 		if (token.length() > delim.length())
+		{
 			dest.push_back(token);
+		}
 	}
 
 	int HttpResponseParser::checkFirstline(std::string &line, dems::Context &cont)
@@ -197,7 +209,9 @@ namespace zia::default_module {
 				break ;
 			}
 		if (std::get<dems::header::Response>(cont.response.firstLine).httpVersion == "")
+		{
 			return (1);
+		}
 		std::get<dems::header::Response>(cont.response.firstLine).statusCode = Firstline[1];
 		std::get<dems::header::Response>(cont.response.firstLine).message = Firstline[2];
 		return (0);
