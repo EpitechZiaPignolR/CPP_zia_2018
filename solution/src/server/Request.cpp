@@ -10,6 +10,7 @@
 #include <boost/thread/thread.hpp>
 #include "server/Request.hpp"
 #include "server/Headers.hpp"
+#include "default_module/ModuleHttpRequestParser.hpp"
 
 namespace zia::server {
 	Request::Request(dems::config::Config &config, dems::StageManager &stageManager, zia::server::SocketPtr &&socket):
@@ -63,7 +64,8 @@ namespace zia::server {
 			}
 			timeOut = 0;
 			// get chunksize;
-			chunkSize = 0;
+			if (default_module::HttpRequestParser::getChunkSize(_context.rawData))
+				break;
 			for (auto &func: _stageManager.chunks().middleHooks())
 				func.second.callback(_context);
 			for (auto &func: _stageManager.chunks().endHooks())
