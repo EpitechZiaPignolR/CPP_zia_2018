@@ -25,7 +25,7 @@ namespace zia::default_module {
 		HttpResponseParser response(cont);
 
 		auto ret = response.setResponse();
-		if (dems::CodeStatus::OK)
+		if (ret != dems::CodeStatus::OK)
 			return (ret);
 		while ((ret = response.getChunk(cont.rawData)) != dems::CodeStatus::DECLINED)
 			if (ret == dems::CodeStatus::HTTP_ERROR)

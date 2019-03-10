@@ -22,10 +22,10 @@ namespace zia::default_module {
 
 	dems::CodeStatus HttpRequestChunked(dems::Context &cont)
 	{
-		HttpResponseParser request(cont);
+		HttpRequestParser request(cont);
 
-		auto ret = request.setResponse();
-		if (dems::CodeStatus::OK)
+		auto ret = request.setRequest();
+		if (ret != dems::CodeStatus::OK)
 			return (ret);
 		while ((ret = request.getChunk(cont.rawData)) != dems::CodeStatus::DECLINED)
 			if (ret == dems::CodeStatus::HTTP_ERROR)
