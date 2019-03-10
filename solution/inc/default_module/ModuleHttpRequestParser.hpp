@@ -13,6 +13,7 @@
 namespace zia::default_module {
 
 	dems::CodeStatus HttpRequest(dems::Context &cont);
+	dems::CodeStatus HttpRequestChunked(dems::Context &cont);
 
 	class HttpRequestParser
 	{
@@ -42,6 +43,7 @@ namespace zia::default_module {
 
 	inline std::string registerHttpRequestHooks(dems::StageManager &manager) {
 		manager.connection().hookToEnd(200000, "HttpRequest", HttpRequest);
+		manager.chunks().hookToFirst(200000, "HttpRequestChunked", HttpRequestChunked);
 		return "HttpRequest";
 	}
 }
