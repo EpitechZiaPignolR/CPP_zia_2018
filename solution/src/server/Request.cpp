@@ -17,7 +17,7 @@ namespace zia::server {
 	_socket(std::move(socket)),
 	_stageManager(stageManager),
 	_context(dems::Context{
-		std::vector<uint8_t>{},
+		std::vector<uint8_t>(),
 		dems::header::HTTPMessage{
 			dems::header::Request{"", "", ""},
 			std::make_unique<Headers>(),
@@ -83,8 +83,10 @@ namespace zia::server {
 			func.second.callback(_context);
 		}
 		for (auto &func: _stageManager.request().endHooks()) {
+			std::cout << func.second.moduleName << std::endl;
 			func.second.callback(_context);
 		}
+		std::cout << _context.response.body << std::endl;
 	}
 
 	void Request::handleDisconnect()

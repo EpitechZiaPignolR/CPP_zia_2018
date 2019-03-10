@@ -31,7 +31,7 @@ namespace zia::default_module {
 		ssize_t readByte;
 		int flags;
 
-		if (!context.rawData.empty() && !is_readable(context))
+		if (!context.rawData.empty() || !is_readable(context))
 			return dems::CodeStatus::OK;
 #ifdef __linux__
 		// récupère les flags du fd

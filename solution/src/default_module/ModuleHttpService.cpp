@@ -59,8 +59,6 @@ namespace zia::default_module {
 		catch (std::exception &) {
 			path = fs::current_path();
 		}
-		if (!fs::exists(path))
-			path = fs::current_path();
 		path += requestFile;
 		if (!fs::is_regular_file(path)) {
 			path /= "index.html";
