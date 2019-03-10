@@ -150,7 +150,7 @@ namespace zia::default_module {
 			body += c;
 		if (_length != 0 && _length != body.length())
 			return (dems::CodeStatus::DECLINED);
-		_cont.request.body = body;
+		_cont.response.body = body;
 		data.clear();
 		return (dems::CodeStatus::OK);
 	}
