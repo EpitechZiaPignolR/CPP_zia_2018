@@ -105,7 +105,7 @@ namespace zia::default_module {
 		for (auto & c : data)
 			body += c;
 		total = body.substr(0, body.find_first_of("\r\n")).length();
-		if ((chunkSize = getChunkSize(body)) == 0)
+		if ((chunkSize = getChunkSize(_cont.rawData)) == 0)
 		{
 			data.clear();
 			return (dems::CodeStatus::DECLINED);
@@ -125,10 +125,13 @@ namespace zia::default_module {
 		return (dems::CodeStatus::OK);
 	}
 
-	ssize_t HttpRequestParser::getChunkSize(std::string &body)
+	ssize_t HttpRequestParser::getChunkSize(std::vector<uint8_t> &data)
 	{
+		std::string body;
 		size_t chunkSize;
 
+		for (auto & c : data)
+			body += c;
 		try
 		{
 			chunkSize = std::stoul(body.substr(0, body.find_first_of("\r\n")), nullptr, 16);

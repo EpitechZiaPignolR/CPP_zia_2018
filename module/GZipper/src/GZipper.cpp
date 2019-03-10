@@ -12,19 +12,21 @@
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/copy.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
-#include "ModuleGZipper.hpp"
+#include "GZipper.hpp"
 
 dems::CodeStatus ModuleGZipper(dems::Context &context)
 {
     auto &request = context.request;
     auto &response = context.response;
     auto &accept_encoding = request.headers->getHeader("Accept-Encoding");
-    if (accept_encoding == "" || accept_encoding.find("gzip") == accept_encoding.npos)
+    if (accept_encoding.empty() || accept_encoding.find("gzip") == accept_encoding.npos)
         return dems::CodeStatus::DECLINED;
     else
     {
-        response.headers->setHeader("content-encoding", "gzip");
-
+    	auto &content_encoding = (*response.headers)["content-encoding"];
+        if (!content_encoding.empty())
+        	content_encoding += ", ";
+    	content_encoding += "gzip";
         std::stringstream compressed;
         std::stringstream new_body;
         new_body << response.body;
