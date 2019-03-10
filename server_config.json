@@ -10,8 +10,8 @@
 			"certificate": "../certificate/zia-cert.pem",
 			"certificate-key": "../certificate/zia-key.pem"
 		},
-		"Tester": {
-			"path": "module/tester/libmodule_tester.so"
+		"DeflateZipper": {
+			"path": "module/DeflateZipper/lib/libmodule_DeflateZipper.so"
 		}
 	}
 }

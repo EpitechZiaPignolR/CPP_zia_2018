@@ -16,11 +16,9 @@ namespace zia::default_module {
 				return dems::CodeStatus::OK;
 
 		} catch (std::exception &e) {}
-		context.response = {
-			dems::header::Response{"HTTP/1.1", "404", "Not Found"},
-			nullptr,
-			"<head></head><body><h1>Page Not Found</h1></body>"
-		};
+		context.response.firstLine = dems::header::Response{"HTTP/1.1", "404", "Not Found"};
+		if (std::get<dems::header::Request>(context.request.firstLine).method != "HEAD")
+			context.response.body = "<head></head><body><h1>Page Not Found</h1></body>";
 		return dems::CodeStatus::OK;
 	}
 }

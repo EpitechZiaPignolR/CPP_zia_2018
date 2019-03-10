@@ -17,21 +17,24 @@
 dems::CodeStatus ModuleDeflateZipper(dems::Context &context)
 {
     auto &request = context.request;
-    if (request.headers->getHeader("accept-encoding").find("deflate") != 0)
+    auto &response = context.response;
+    auto &accept_encoding = request.headers->getHeader("Accept-Encoding");
+    if (accept_encoding == "" || accept_encoding.find("deflate") == accept_encoding.npos)
         return dems::CodeStatus::DECLINED;
     else
     {
-        context.request.headers->setHeader("content-encoding", "deflate");
+        if (response.headers == nullptr)
+            std::cout << "racacd"<< std::endl;
+        response.headers->setHeader("content-encoding", "deflate");
 
         std::stringstream compressed;
         std::stringstream new_body;
-        new_body << request.body;
+        new_body << response.body;
         boost::iostreams::filtering_streambuf<boost::iostreams::input> out;
         out.push(boost::iostreams::zlib_compressor());
         out.push(new_body);
         boost::iostreams::copy(out, compressed);
-        request.body = compressed.str();
-        dprintf(context.socketFd, "%s", request.body.c_str());
+        response.body = compressed.str();
     }
     return dems::CodeStatus::OK;
 }
@@ -39,7 +42,7 @@ dems::CodeStatus ModuleDeflateZipper(dems::Context &context)
 extern "C" {
     std::string registerHooks(dems::StageManager &manager)
     {
-        manager.request().hookToEnd(10, "DeflateZipper", ModuleDeflateZipper);
+        manager.request().hookToEnd(50000, "DeflateZipper", ModuleDeflateZipper);
         return "DeflateZipper";
     }
 }

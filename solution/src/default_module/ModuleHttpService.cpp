@@ -32,11 +32,9 @@ namespace zia::default_module {
 		content.assign((std::istreambuf_iterator<char>(file)),
 			std::istreambuf_iterator<char>());
 
-		context.response = {
-			dems::header::Response{"Http/1.1", "200", "OK"},
-			nullptr,
-			content
-		};
+		context.response.firstLine = dems::header::Response{"Http/1.1", "200", "OK"};
+		if (std::get<dems::header::Request>(context.request.firstLine).method != "HEAD")
+			context.response.body = content;
 		return dems::CodeStatus::OK;
 	}
 
