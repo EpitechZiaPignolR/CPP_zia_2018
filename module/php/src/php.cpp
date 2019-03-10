@@ -13,9 +13,86 @@
 #include <experimental/filesystem>
 #include "api/Stage.hpp"
 #include <iostream>
+#include <ctime>
+#include <cstring>
+#include <sstream>
 
 #define PROG "/usr/bin/php"
 extern char **environ;
+
+std::vector<std::string>  GetEnvForPhp(dems::Context &context)
+{
+    std::vector<std::string> tmp_env(environ, environ+std::strlen((char *)environ));
+    std::stringstream ss;
+
+    auto &firstLine = std::get<dems::header::Request>(context.request.firstLine);
+    ss << "PHP_SELF=" << firstLine.path;
+    tmp_env.push_back(ss.str());
+    ss.str(std::string());
+    ss << "REQUEST_URI=" << firstLine.path;
+    tmp_env.push_back(ss.str());
+    ss.str(std::string());
+    try  {
+        auto &confServer = std::get<dems::config::ConfigObject>(context.config["server"].v);
+        try {
+            auto &ip = std::get<std::string>(context.config["ip"].v);
+            ss << "SERVER_ADDR=" << ip;
+            tmp_env.push_back(ss.str());
+            ss.str(std::string());
+        } catch (std::exception &) {}
+        try {
+            auto &port = std::get<long long>(context.config["port"].v);
+            ss << "SERVER_PORT=" << port;
+            tmp_env.push_back(ss.str());
+            ss.str(std::string());
+        } catch (std::exception &) {}
+        try {
+            auto &root = std::get<std::string>(context.config["root"].v);
+            ss << "DOCUMENT_ROOT=" << root;
+            tmp_env.push_back(ss.str());
+            ss.str(std::string());
+        } catch (std::exception &) {}
+    } catch (std::exception &) {}
+
+    tmp_env.push_back("SERVER_SOFTWARE=ZIA");
+    tmp_env.push_back("SERVER_PROTOCOL=HTTP/1.1");
+    ss << "REQUEST_METHOD=" <<  firstLine.method;
+    tmp_env.push_back(ss.str());
+    ss.str(std::string());
+    ss << "REQUEST_TIME=" <<  std::time(0);
+    tmp_env.push_back(ss.str());
+    ss.str(std::string());
+    ss << "HTTP_ACCEPT=" << context.request.headers->getHeader("Accept");
+    tmp_env.push_back(ss.str());
+    ss.str(std::string());
+    ss << "HTTP_ACCEPT_CHARSET=" <<  context.request.headers->getHeader("Accept-Charset");
+    tmp_env.push_back(ss.str());
+    ss.str(std::string());
+    ss << "HTTP_ACCEPT_ENCODING=" <<  context.request.headers->getHeader("Accept-Encoding");
+    tmp_env.push_back(ss.str());
+    ss.str(std::string());
+    ss << "HTTP_ACCEPT_LANGUAGE=" <<  context.request.headers->getHeader("Accept-Language");
+    tmp_env.push_back(ss.str());
+    ss.str(std::string());
+    ss << "HTTP_CONNECTION=" <<  context.request.headers->getHeader("Connection");
+    tmp_env.push_back(ss.str());
+    ss.str(std::string());
+    ss << "HTTP_HOST=" <<  context.request.headers->getHeader("Host");
+    tmp_env.push_back(ss.str());
+    ss.str(std::string());
+    ss << "HTTP_REFERER=" <<  context.request.headers->getHeader("Referer");
+    tmp_env.push_back(ss.str());
+    ss.str(std::string());
+    ss << "HTTP_USER_AGENT=" <<  context.request.headers->getHeader("User_Agent");
+    tmp_env.push_back(ss.str());
+    ss.str(std::string());
+    try {
+    if (std::get<bool>(context.config["is_SSL"].v))
+        tmp_env.push_back("HTTPS=true");
+    }catch(std::exception&){}
+
+    return tmp_env;
+}
 
 std::string     GetFilePath(dems::Context &context)
 {
@@ -67,8 +144,13 @@ try  {
     auto file = GetFilePath(context);
     char* a[] = { phpPath.data(), file.data(), nullptr };
 
-    std::cout << a[0] << std::endl
-    << a[1] << std::endl;
+    auto tmp_env = GetEnvForPhp(context);
+
+    std::vector<char*> new_env;
+    new_env.reserve(tmp_env.size());
+
+    for(size_t i = 0; i < tmp_env.size(); ++i)
+        new_env.push_back(const_cast<char*>(tmp_env[i].c_str()));
 
     int forkId = fork();
     if (forkId == -1)
@@ -82,9 +164,9 @@ try  {
         dup2(pipefd[1], 1);
         dup2(pipefd[1], 2);
         close(pipefd[1]);
-        if (execve(phpPath.c_str(), a, environ) == -1)
+        if (execve(phpPath.c_str(), a, new_env.data()) == -1)
           {
-             printf("Execve failed: %s\n", strerror(errno));
+             std::cerr << "Execve failed: " << strerror(errno) << std::endl;
              exit(1);
           }
     }
@@ -102,14 +184,6 @@ try  {
       }
     }
 }
-
-// std::vector<std::string>  GetEnvForPhp(dems::Context &context)
-// {
-//     std::vector<std::string> tmp_env(std::begin(environ), std::end(environ));
-//
-//     return tmp_env;
-// }
-
 
 dems::CodeStatus ModulePhp(dems::Context &context)
 {
