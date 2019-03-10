@@ -13,6 +13,7 @@
 namespace zia::default_module {
 
 	dems::CodeStatus HttpResponse(dems::Context &cont);
+	dems::CodeStatus HttpResponseChunked(dems::Context &cont);
 	
 	class HttpResponseParser
 	{

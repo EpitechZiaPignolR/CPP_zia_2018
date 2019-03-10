@@ -20,6 +20,19 @@ namespace zia::default_module {
 		return (ret);
 	}
 
+	dems::CodeStatus HttpResponseChunked(dems::Context &cont)
+	{
+		HttpResponseParser response(cont);
+
+		auto ret = response.setResponse();
+		if (dems::CodeStatus::OK)
+			return (ret);
+		while ((ret = response.getChunk(cont.rawData)) != dems::CodeStatus::DECLINED)
+			if (ret == dems::CodeStatus::HTTP_ERROR)
+				return (dems::CodeStatus::DECLINED);
+		return (dems::CodeStatus::OK);
+	}
+
 	HttpResponseParser::HttpResponseParser(dems::Context &cont) :
 	_length(0), _left(0), _chunked(false), _cont(cont)
 	{
@@ -61,7 +74,7 @@ namespace zia::default_module {
 			_cont.request.headers->setHeader(line[0], line[1]);
 			line.clear();
 		}
-		cleanRawData(i);
+		cleanRawData(++i);
 		if (_chunked == false)
 			getStandardBody(_cont.rawData);
 		return (dems::CodeStatus::OK);
@@ -95,16 +108,16 @@ namespace zia::default_module {
 		if ((chunkSize = getChunkSize(body)) == 0)
 		{
 			data.clear();
-			return (dems::CodeStatus::OK);
+			return (dems::CodeStatus::DECLINED);
 		}
 		try
 		{
 			if (!body.substr(chunkSize - 2).compare("\r\n"))
-				return (dems::CodeStatus::DECLINED);
+				return (dems::CodeStatus::HTTP_ERROR);
 		}
 		catch (const std::exception& e)
 		{
-			return (dems::CodeStatus::DECLINED);
+			return (dems::CodeStatus::HTTP_ERROR);
 		}
 		_rest += body.substr(body.find_first_of("\r\n") + 2, chunkSize);
 		_cont.request.body = _rest;
