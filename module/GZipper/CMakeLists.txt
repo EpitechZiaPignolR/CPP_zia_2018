@@ -1,15 +1,15 @@
 cmake_minimum_required(VERSION 3.1.0)
 
-project(module_DeflateZipper DESCRIPTION "module de compression deflate pour le zia")
-set(LIBRARY_NAME module_DeflateZipper)
+project(module_GZipper DESCRIPTION "module de compression gzip pour le zia")
+set(LIBRARY_NAME module_GZipper)
 set(CMAKE_CXX_STANDARD 17)
 
 set(SRCS
-	src/ModuleDeflateZipper.cpp
+	src/ModuleGZipper.cpp
 	)
 
 set(HDRS
-	inc/ModuleDeflateZipper.hpp
+	inc/ModuleGZipper.hpp
 	)
 
 
