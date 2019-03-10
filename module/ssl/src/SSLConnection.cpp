@@ -241,7 +241,6 @@ namespace zia::ssl_module {
 
 	void SSLConnection::disconnect()
 	{
-		std::cout << "SSL disconnect" << std::endl;
 		if (_ssl) {
 			SSL_shutdown(_ssl);
 			SSL_free(_ssl);

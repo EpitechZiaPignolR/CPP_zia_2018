@@ -29,7 +29,6 @@ namespace zia::server {
 		_socket->native_handle(),
 		config })
 	{
-		std::cout << "Request: connection" << std::endl;
 		for (auto &func: _stageManager.connection().firstHooks()) {
 			func.second.callback(_context);
 		}
@@ -46,7 +45,6 @@ namespace zia::server {
 
 	void Request::handleChunks()
 	{
-		std::cout << "Request: Chunk" << std::endl;
 		std::size_t timeOut = 0;
 		std::size_t chunkSize = 0;
 		do {
@@ -74,7 +72,6 @@ namespace zia::server {
 
 	void Request::handleRequest()
 	{
-		std::cout << "Request: handle request" << std::endl;
 		_context.rawData.clear();
 		for (auto &func: _stageManager.request().firstHooks()) {
 			func.second.callback(_context);
@@ -83,15 +80,12 @@ namespace zia::server {
 			func.second.callback(_context);
 		}
 		for (auto &func: _stageManager.request().endHooks()) {
-			std::cout << func.second.moduleName << std::endl;
 			func.second.callback(_context);
 		}
-		std::cout << _context.response.body << std::endl;
 	}
 
 	void Request::handleDisconnect()
 	{
-		std::cout << "Request: disconnect" << std::endl;
 		for (auto &func: _stageManager.disconnect().firstHooks()) {
 			func.second.callback(_context);
 		}

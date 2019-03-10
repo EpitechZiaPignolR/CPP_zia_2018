@@ -40,6 +40,9 @@ namespace zia::default_module {
 
 	dems::CodeStatus ModuleHttpService(dems::Context &context)
 	{
+		if (!context.rawData.empty()
+			|| !std::get<dems::header::Response>(context.response.firstLine).statusCode.empty())
+			return dems::CodeStatus::OK;
 		std::string requestFile;
 		fs::path path;
 		try {

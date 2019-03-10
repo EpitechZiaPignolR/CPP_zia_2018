@@ -144,6 +144,8 @@ try  {
     auto file = GetFilePath(context);
     char* a[] = { phpPath.data(), file.data(), nullptr };
 
+
+    std::cout << a[0] << std::endl << a[1] << std::endl;
     auto tmp_env = GetEnvForPhp(context);
 
     std::vector<char*> new_env;
@@ -176,12 +178,15 @@ try  {
 
       close(pipefd[1]);
       int size = read(pipefd[0], buffer, sizeof(buffer));
+      context.response.body.clear();
       while (size > 0)
       {
           for (int i = 0; i < size; ++i)
-            context.rawData.push_back(buffer[i]);
+            context.response.body.push_back(buffer[i]);
          size = read(pipefd[0], buffer, sizeof(buffer));
       }
+      if (!context.response.body.empty())
+          context.response.firstLine = dems::header::Response{ "HTTP/1.1", "200", "OK" };
     }
 }
 
