@@ -31,15 +31,12 @@ namespace zia::server {
 	{
 		std::cout << "Request: connection" << std::endl;
 		for (auto &func: _stageManager.connection().firstHooks()) {
-			std::cout << func.second.moduleName << std::endl;
 			func.second.callback(_context);
 		}
 		for (auto &func: _stageManager.connection().middleHooks()) {
-			std::cout << func.second.moduleName << std::endl;
 			func.second.callback(_context);
 		}
 		for (auto &func: _stageManager.connection().endHooks()) {
-			std::cout << func.second.moduleName << std::endl;
 			func.second.callback(_context);
 		}
 		const auto &transferEncoding = (*_context.request.headers).getHeader("Transfer-Encoding");
@@ -53,8 +50,9 @@ namespace zia::server {
 		std::size_t timeOut = 0;
 		std::size_t chunkSize = 0;
 		do {
-			for (auto &func: _stageManager.chunks().firstHooks())
+			for (auto &func: _stageManager.chunks().firstHooks()) {
 				func.second.callback(_context);
+			}
 			if (_context.rawData.empty()) {
 				boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
 				if (timeOut++ >= 3000)
@@ -64,12 +62,13 @@ namespace zia::server {
 			}
 			timeOut = 0;
 			// get chunksize;
-			if (default_module::HttpRequestParser::getChunkSize(_context.rawData))
-				break;
-			for (auto &func: _stageManager.chunks().middleHooks())
+			chunkSize = default_module::HttpRequestParser::getChunkSize(_context.rawData);
+			for (auto &func: _stageManager.chunks().middleHooks()) {
 				func.second.callback(_context);
-			for (auto &func: _stageManager.chunks().endHooks())
+			}
+			for (auto &func: _stageManager.chunks().endHooks()) {
 				func.second.callback(_context);
+			}
 		} while (chunkSize);
 	}
 
@@ -78,15 +77,12 @@ namespace zia::server {
 		std::cout << "Request: handle request" << std::endl;
 		_context.rawData.clear();
 		for (auto &func: _stageManager.request().firstHooks()) {
-			std::cout << func.second.moduleName << std::endl;
 			func.second.callback(_context);
 		}
 		for (auto &func: _stageManager.request().middleHooks()) {
-			std::cout << func.second.moduleName << std::endl;
 			func.second.callback(_context);
 		}
 		for (auto &func: _stageManager.request().endHooks()) {
-			std::cout << func.second.moduleName << std::endl;
 			func.second.callback(_context);
 		}
 	}
@@ -95,15 +91,12 @@ namespace zia::server {
 	{
 		std::cout << "Request: disconnect" << std::endl;
 		for (auto &func: _stageManager.disconnect().firstHooks()) {
-			std::cout << func.second.moduleName << std::endl;
 			func.second.callback(_context);
 		}
 		for (auto &func: _stageManager.disconnect().middleHooks()) {
-			std::cout << func.second.moduleName << std::endl;
 			func.second.callback(_context);
 		}
 		for (auto &func: _stageManager.disconnect().endHooks()) {
-			std::cout << func.second.moduleName << std::endl;
 			func.second.callback(_context);
 		}
 	}
