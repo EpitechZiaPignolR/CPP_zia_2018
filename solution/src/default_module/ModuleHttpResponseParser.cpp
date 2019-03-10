@@ -71,7 +71,7 @@ namespace zia::default_module {
 			}
 			if (line[0].compare("Transfer-Encoding") && line[1].compare("chunked"))
 				_chunked = true;
-			_cont.request.headers->setHeader(line[0], line[1]);
+			_cont.response.headers->setHeader(line[0], line[1]);
 			line.clear();
 		}
 		cleanRawData(++i);
@@ -120,7 +120,7 @@ namespace zia::default_module {
 			return (dems::CodeStatus::HTTP_ERROR);
 		}
 		_rest += body.substr(body.find_first_of("\r\n") + 2, chunkSize);
-		_cont.request.body = _rest;
+		_cont.response.body = _rest;
 		data.erase(data.begin(), data.begin() + total + 2 + chunkSize);
 		return (dems::CodeStatus::OK);
 	}
@@ -189,17 +189,17 @@ namespace zia::default_module {
 		std::string splitChar = " ";
 
 		zia::default_module::HttpResponseParser::mySplit(Firstline, line, splitChar);
-		std::get<dems::header::Response>(cont.request.firstLine).httpVersion = "";
+		std::get<dems::header::Response>(cont.response.firstLine).httpVersion = "";
 		for (auto & v : versions)
 			if (Firstline[0].compare(v))
 			{
-				std::get<dems::header::Response>(cont.request.firstLine).httpVersion = Firstline[0];
+				std::get<dems::header::Response>(cont.response.firstLine).httpVersion = Firstline[0];
 				break ;
 			}
-		if (std::get<dems::header::Response>(cont.request.firstLine).httpVersion == "")
+		if (std::get<dems::header::Response>(cont.response.firstLine).httpVersion == "")
 			return (1);
-		std::get<dems::header::Response>(cont.request.firstLine).statusCode = Firstline[1];
-		std::get<dems::header::Response>(cont.request.firstLine).message = Firstline[2];
+		std::get<dems::header::Response>(cont.response.firstLine).statusCode = Firstline[1];
+		std::get<dems::header::Response>(cont.response.firstLine).message = Firstline[2];
 		return (0);
 	}
 }
