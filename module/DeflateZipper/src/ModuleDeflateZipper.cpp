@@ -19,11 +19,14 @@ dems::CodeStatus ModuleDeflateZipper(dems::Context &context)
     auto &request = context.request;
     auto &response = context.response;
     auto &accept_encoding = request.headers->getHeader("Accept-Encoding");
-    if (accept_encoding == "" || accept_encoding.find("deflate") == accept_encoding.npos)
+    if (accept_encoding.empty() || accept_encoding.find("deflate") == accept_encoding.npos)
         return dems::CodeStatus::DECLINED;
     else
     {
-        response.headers->setHeader("content-encoding", "deflate");
+        auto &content_encoding = (*response.headers)["content-encoding"];
+        if (!content_encoding.empty())
+            content_encoding += ", ";
+        content_encoding += "deflate";
 
         std::stringstream compressed;
         std::stringstream new_body;

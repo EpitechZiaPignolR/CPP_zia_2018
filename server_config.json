@@ -12,6 +12,9 @@
 		},
 		"DeflateZipper": {
 			"path": "module/DeflateZipper/lib/libmodule_DeflateZipper.so"
+		},
+		"GZipper": {
+			"path": "module/GZipper/lib/libmodule_GZipper.so"
 		}
 	}
 }

@@ -5,16 +5,19 @@
 ** ModuleWriter.cpp
 */
 
-#include <cstdio>
+#ifdef __linux__
+	#include <unistd.h>
+#endif // __linux__
 #include "default_module/ModuleWriter.hpp"
 
 namespace zia::default_module {
 	dems::CodeStatus ModuleWriter(dems::Context &context)
 	{
-		std::string tmp;
-		for (auto &it: context.rawData)
-			tmp += it;
-		dprintf(context.socketFd, "%s", tmp.c_str());
+#ifdef __linux__
+		write(context.socketFd, context.rawData.data(), context.rawData.size());
+#else
+		send(context.socketFd, context.rawData.data(), context.rawData.size(), 0);
+#endif //__linux
 		return dems::CodeStatus::OK;
 	}
 }

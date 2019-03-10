@@ -5,14 +5,12 @@ set(LIBRARY_NAME module_GZipper)
 set(CMAKE_CXX_STANDARD 17)
 
 set(SRCS
-	src/ModuleGZipper.cpp
+	src/GZipper.cpp
 	)
 
 set(HDRS
-	inc/ModuleGZipper.hpp
+	inc/GZipper.hpp
 	)
-
-
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()

@@ -67,7 +67,6 @@ namespace zia::default_module {
 			if (!fs::exists(path) || !fs::is_regular_file(path))
 				return dems::CodeStatus::HTTP_ERROR;
 		}
-//		std::cout << path << std::endl;
 		return getRequestedFile(context, std::move(path));
 	}
 }
